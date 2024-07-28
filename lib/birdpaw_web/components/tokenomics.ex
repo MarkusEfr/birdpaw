@@ -11,7 +11,11 @@ defmodule BirdpawWeb.Components.Tokenomics do
       <h2 class="text-4xl text-center mb-12 font-bold">Tokenomics</h2>
       <div class="flex flex-col max-w-6xl mx-auto space-y-12">
         <div class="flex items-center bg-gray-800 rounded-lg p-6 shadow-lg">
-          <img src="/images/tokenomics/1.png" alt="Distribution Icon" class="w-16 h-16 mr-6" />
+          <img
+            src="/images/tokenomics/distribution.png"
+            alt="Distribution Icon"
+            class="w-16 h-16 mr-6"
+          />
           <div class="flex-1">
             <h3 class="text-3xl font-semibold mb-2 text-blue-300">Distribution</h3>
             <p class="text-lg mb-4">
@@ -28,7 +32,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
           </div>
         </div>
         <div class="flex items-center bg-gray-800 rounded-lg p-6 shadow-lg">
-          <img src="/images/tokenomics/2.png" alt="Allocation Icon" class="w-16 h-16 mr-6" />
+          <img src="/images/tokenomics/allocation.png" alt="Allocation Icon" class="w-16 h-16 mr-6" />
           <div class="flex-1">
             <h3 class="text-3xl font-semibold mb-2 text-green-300">Allocation</h3>
             <p class="text-lg mb-4">
@@ -45,7 +49,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
           </div>
         </div>
         <div class="flex items-center bg-gray-800 rounded-lg p-6 shadow-lg">
-          <img src="/images/tokenomics/4.png" alt="Rewards Icon" class="w-16 h-16 mr-6" />
+          <img src="/images/tokenomics/rewards.png" alt="Rewards Icon" class="w-16 h-16 mr-6" />
           <div class="flex-1">
             <h3 class="text-3xl font-semibold mb-2 text-purple-300">Rewards</h3>
             <p class="text-lg mb-4">

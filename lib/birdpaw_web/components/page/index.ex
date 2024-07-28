@@ -96,6 +96,9 @@ defmodule BirdpawWeb.Page.Index do
         <div id="tokenomics" class="mt-10">
           <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
         </div>
+        <div id="roadmap" class="mt-10">
+          <.live_component module={BirdpawWeb.Components.Roadmap} id="roadmap" />
+        </div>
       </div>
     </main>
     """

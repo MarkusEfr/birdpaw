@@ -50,3 +50,19 @@
 .scroll-button:hover {
     color: #ff4500;
 }
+
+@keyframes fly-in {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-fly-in {
+    animation: fly-in 1s ease-out;
+}

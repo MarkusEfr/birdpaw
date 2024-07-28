@@ -97,7 +97,7 @@ defmodule BirdpawWeb.Page.Index do
   def render_attributes(assigns) do
     ~H"""
     <div class="overlay bg-black bg-opacity-70 w-full h-full flex flex-col items-center justify-center text-white p-4 md:p-8">
-      <div class="bg-gray-800 bg-opacity-50 rounded-lg p-6 md:p-10 max-w-lg md:max-w-3xl text-center shadow-lg backdrop-filter backdrop-blur-sm border border-gray-700">
+      <div class="animate-fly-in bg-gray-800 bg-opacity-50 rounded-lg p-6 md:p-10 max-w-lg md:max-w-3xl text-center shadow-lg backdrop-filter backdrop-blur-sm border border-gray-700">
         <h1 class="title text-3xl md:text-5xl font-extrabold mb-2 md:mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
           Birdcatcher Cats (BIRDPAW)
         </h1>

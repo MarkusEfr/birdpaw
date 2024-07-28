@@ -21,41 +21,13 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import Chart from 'chart.js/auto';
 
 let hooks = {}
-
-
-hooks.Tokenomics = {
-  mounted: () => {
-    let ctx = document.getElementById("tokenomics-chart").getContext("2d")
-    let chart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        datasets: [
-          {
-            data: [10, 10, 10, 10, 10, 10],
-            backgroundColor: [
-              "rgba(26, 188, 156, .9)",
-              "rgba(52, 152, 219, .9)",
-              "rgba(241, 196, 15,  .9)",
-              "rgba(230, 126, 34,  .9)",
-              "rgba(211, 84,  0,   .9)",
-              "rgba(44,  62,  80, .9)",
-            ],
-          },
-        ],
-      },
-    })
-
-    chart.update()
-  }
-}
-
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
+  hooks: hooks,
   params: { _csrf_token: csrfToken }
 })
 

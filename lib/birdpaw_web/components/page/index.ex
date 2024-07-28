@@ -51,7 +51,7 @@ defmodule BirdpawWeb.Page.Index do
           class="welcome-component bg-cover min-h-screen flex items-center justify-center"
           style="background-image: url('/images/image.webp');"
         >
-          <.live_component module={BirdpawWeb.Components.Attributes} id="attributes-section" />
+          <.live_component module={BirdpawWeb.Components.Attributes} id="attributes" />
         </div>
 
         <div
@@ -92,8 +92,11 @@ defmodule BirdpawWeb.Page.Index do
             </div>
           </div>
         </div>
+
+        <div id="tokenomics" class="mt-10">
+          <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
+        </div>
       </div>
-       <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics-section" />
     </main>
     """
   end

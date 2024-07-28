@@ -66,3 +66,17 @@
 .animate-fly-in {
     animation: fly-in 1s ease-out;
 }
+
+@keyframes grow {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: var(--progress);
+    }
+}
+
+.animate-grow {
+    animation: grow 2s ease-in-out forwards;
+}

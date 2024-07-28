@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+
+    /* Scrollbar Styles */
+    ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: theme('colors.scrollbar');
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: theme('colors.scrollbar-thumb');
+        border-radius: 6px;
+        border: 3px solid theme('colors.scrollbar');
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: theme('colors.scrollbar-thumb-hover');
+    }
+
+    .text-shadow-lg {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* This file is for your main application CSS */
+
+.welcome-component {
+    position: relative;
+    text-align: center;
+}
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.scroll-button {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.scroll-button:hover {
+    color: #ff4500;
+}

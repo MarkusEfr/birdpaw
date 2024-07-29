@@ -7,7 +7,7 @@ defmodule BirdpawWeb.Components.Footer do
   @impl true
   def render(assigns) do
     ~H"""
-    <footer class="bg-gray-900 text-white py-8">
+    <footer class="bg-gray-900 text-white py-10">
       <div class="max-w-6xl mx-auto px-4">
         <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
           <div class="text-center md:text-left mb-4 md:mb-0">

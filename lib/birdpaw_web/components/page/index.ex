@@ -161,7 +161,7 @@ defmodule BirdpawWeb.Page.Index do
           />
         </div>
 
-        <div id="footer" class="mt-10">
+        <div id="footer">
           <.live_component module={BirdpawWeb.Components.Footer} id="footer" />
         </div>
       </div>

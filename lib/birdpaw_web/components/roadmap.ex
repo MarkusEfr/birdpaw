@@ -20,7 +20,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             1
           </div>
           <div class="timeline-content bg-gray-800 p-8 rounded-lg shadow-lg text-center w-full md:w-3/4 lg:w-2/3">
-            <h3 class="text-3xl font-semibold mb-2 text-white">Project Launch</h3>
+            <h3 class="text-2xl md:text-3xl font-semibold mb-2 text-white">Project Launch</h3>
             <p class="text-lg text-blue-400 mb-4">Phase 1 (Done)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Official Launch:</span>
@@ -34,7 +34,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             2
           </div>
           <div class="timeline-content bg-gray-800 p-8 rounded-lg shadow-lg text-center w-full md:w-3/4 lg:w-2/3">
-            <h3 class="text-3xl font-semibold mb-2 text-white">Platform Development</h3>
+            <h3 class="text-2xl md:text-3xl font-semibold mb-2 text-white">Platform Development</h3>
             <p class="text-lg text-green-400 mb-4">Phase 2 (In Progress)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Building the Future:</span>
@@ -48,7 +48,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             3
           </div>
           <div class="timeline-content bg-gray-800 p-8 rounded-lg shadow-lg text-center w-full md:w-3/4 lg:w-2/3">
-            <h3 class="text-3xl font-semibold mb-2 text-white">Exchange Listings</h3>
+            <h3 class="text-2xl md:text-3xl font-semibold mb-2 text-white">Exchange Listings</h3>
             <p class="text-lg text-purple-400 mb-4">Phase 3 (Upcoming)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Gaining Traction:</span>
@@ -62,7 +62,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             4
           </div>
           <div class="timeline-content bg-gray-800 p-8 rounded-lg shadow-lg text-center w-full md:w-3/4 lg:w-2/3">
-            <h3 class="text-3xl font-semibold mb-2 text-white">NFT Marketplace Launch</h3>
+            <h3 class="text-2xl md:text-3xl  font-semibold mb-2 text-white">NFT Marketplace Launch</h3>
             <p class="text-lg text-orange-400 mb-4">Phase 4 (Upcoming)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Explore & Trade:</span>

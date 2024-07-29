@@ -11,7 +11,11 @@ defmodule BirdpawWeb.Components.Tokenomics do
       <h2 class="text-center mb-8 md:mb-12 text-2xl md:text-3xl">Tokenomics</h2>
 
       <div class="flex flex-col max-w-6xl mx-auto space-y-8 md:space-y-12 px-4 md:px-0">
-        <div class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg">
+        <div
+          id="distribution"
+          class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg opacity-0 transition-opacity duration-500"
+          phx-hook="AnimateOnScroll"
+        >
           <div class="flex-shrink-0 mr-4">
             <img
               src="/images/tokenomics/distribution.png"
@@ -37,7 +41,11 @@ defmodule BirdpawWeb.Components.Tokenomics do
           </div>
         </div>
 
-        <div class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg">
+        <div
+          id="allocation"
+          class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg opacity-0 transition-opacity duration-500"
+          phx-hook="AnimateOnScroll"
+        >
           <div class="flex-shrink-0 mr-4">
             <img
               src="/images/tokenomics/allocation.png"
@@ -63,7 +71,11 @@ defmodule BirdpawWeb.Components.Tokenomics do
           </div>
         </div>
 
-        <div class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg">
+        <div
+          id="rewards"
+          class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg opacity-0 transition-opacity duration-500"
+          phx-hook="AnimateOnScroll"
+        >
           <div class="flex-shrink-0 mr-4">
             <img
               src="/images/tokenomics/rewards.png"

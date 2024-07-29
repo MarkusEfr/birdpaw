@@ -6,6 +6,8 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Process.send_after(self(), :auto_slide, 5000)
+
     {:ok,
      assign(socket,
        current_slide: 0,
@@ -34,6 +36,14 @@ defmodule BirdpawWeb.Page.Index do
   @impl true
   def handle_event("next_slide", _, socket) do
     new_slide = rem(socket.assigns.current_slide + 1, length(slides()))
+    {:noreply, assign(socket, :current_slide, new_slide)}
+  end
+
+  @impl true
+  def handle_info(:auto_slide, socket) do
+    new_slide = rem(socket.assigns.current_slide + 1, length(slides()))
+    # 5 seconds interval
+    Process.send_after(self(), :auto_slide, 5000)
     {:noreply, assign(socket, :current_slide, new_slide)}
   end
 
@@ -130,6 +140,20 @@ defmodule BirdpawWeb.Page.Index do
         </div>
       </div>
     </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        setInterval(() => {
+          const memesElement = document.getElementById("memes");
+          if (memesElement) {
+            const pushEvent = memesElement.__phx__ ? memesElement.__phx__.pushEvent : null;
+            if (pushEvent) {
+              pushEvent.call(memesElement, "next_slide", {});
+            }
+          }
+        }, 5000);
+      });
+    </script>
     """
   end
 end

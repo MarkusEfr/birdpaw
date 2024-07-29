@@ -12,7 +12,7 @@ module.exports = {
         'scrollbar-thumb-hover': '#4d4d4d', // Hover color for the thumb
       },
       animation: {
-        fadeInUp: 'fadeInUp 2s ease-out forwards',
+        fadeInUp: 'fadeInUp 1s ease-out forwards',
       },
       keyframes: {
         fadeInUp: {

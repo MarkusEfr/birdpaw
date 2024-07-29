@@ -14,14 +14,18 @@ defmodule BirdpawWeb.Page.Index do
        faqs: [
          {"What is Birdcatcher Cats?",
           "Birdcatcher Cats ($BIRDPAW) is a fun and engaging meme token built on the Ethereum blockchain.",
-          "1"},
+          "1", nil},
          {"How can I buy $BIRDPAW?",
-          "You can purchase $BIRDPAW on major cryptocurrency exchanges where it is listed.", "2"},
+          "You can purchase $BIRDPAW on major cryptocurrency exchanges where it is listed.", "2",
+          nil},
          {"What is the total supply of $BIRDPAW?",
-          "$BIRDPAW has a total supply of 1,000,000,000 tokens.", "3"},
+          "$BIRDPAW has a total supply of 1,000,000,000 tokens.", "3", nil},
          {"What are the future plans for Birdcatcher Cats?",
           "We plan to develop a platform with wallet integration, list on major exchanges, and launch an NFT marketplace.",
-          "4"}
+          "4", nil},
+         {"Where can I read the whitepaper?",
+          "You can find the Birdcatcher Cats ($BIRDPAW) whitepaper at ",
+          "5", :whitepaper}
        ],
        expanded: false,
        # Replace with your actual contract address

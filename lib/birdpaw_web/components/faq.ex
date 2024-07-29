@@ -17,7 +17,7 @@ defmodule BirdpawWeb.Components.FAQ do
       <h2 class="md:text-3xl text-2xl text-center mb-12">Frequently Asked Questions</h2>
 
       <div class="max-w-6xl mx-auto space-y-8 px-4 md:px-0">
-        <%= for {question, answer, id} <- @faqs do %>
+        <%= for {question, answer, id, key} <- @faqs do %>
           <div class="faq-item bg-gray-800 rounded-lg p-4 md:p-6 shadow-md transition-transform transform hover:scale-105">
             <button
               phx-target={@myself}
@@ -64,6 +64,10 @@ defmodule BirdpawWeb.Components.FAQ do
 
             <div class={"mt-4 text-sm md:text-lg text-gray-100 transition-max-height ease-in-out duration-500 overflow-hidden" <> if @expanded == id, do: " max-h-40", else: " max-h-0"}>
               <%= answer %>
+              <%= if key,
+                do:
+                  ~H[<a href={"https://birdpaw.fly.dev/docs/#{key}.pdf"} target="_blank" class="text-purple-500 hover:underline">Documentation</a>],
+                else: "" %>
               <span class="ml-2">😺</span>
             </div>
           </div>

@@ -16,7 +16,7 @@ defmodule BirdpawWeb.Components.Footer do
 
           <div class="flex flex-wrap justify-center md:justify-start space-x-4 space-y-2 md:space-y-0">
             <a
-              href="https://github.com"
+              href="https://github.com/MarkusEfr/birdpaw"
               target="_blank"
               aria-label="GitHub"
               class="flex items-center space-x-2 hover:text-gray-400"
@@ -33,7 +33,7 @@ defmodule BirdpawWeb.Components.Footer do
             </a>
 
             <a
-              href="https://twitter.com"
+              href="https://x.com/birdpaw_token"
               target="_blank"
               aria-label="Twitter"
               class="flex items-center space-x-2 hover:text-gray-400"

@@ -5,11 +5,6 @@ defmodule BirdpawWeb.Components.FAQ do
   use BirdpawWeb, :live_component
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :expanded, nil)}
-  end
-
-  @impl true
   def handle_event("toggle", %{"id" => id}, socket) do
     new_expanded = if socket.assigns.expanded == id, do: nil, else: id
     {:noreply, assign(socket, :expanded, new_expanded)}

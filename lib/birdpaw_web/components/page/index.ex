@@ -23,7 +23,9 @@ defmodule BirdpawWeb.Page.Index do
           "We plan to develop a platform with wallet integration, list on major exchanges, and launch an NFT marketplace.",
           "4"}
        ],
-       expanded: false
+       expanded: false,
+       # Replace with your actual contract address
+       contract_address: "0x1234567890abcdef1234567890abcdef12345678"
      )}
   end
 
@@ -47,6 +49,11 @@ defmodule BirdpawWeb.Page.Index do
     {:noreply, assign(socket, :current_slide, new_slide)}
   end
 
+  @impl true
+  def handle_event("copy_address", %{"address" => address}, socket) do
+    {:noreply, push_event(socket, "copy_to_clipboard", %{address: address})}
+  end
+
   defp slides do
     [
       %{
@@ -63,6 +70,21 @@ defmodule BirdpawWeb.Page.Index do
         src: "/images/meme_3.webp",
         alt: "To the moon!",
         caption: "To the moon!"
+      },
+      %{
+        src: "/images/meme_5.webp",
+        alt: "Catch the bird!",
+        caption: "Catch the bird!"
+      },
+      %{
+        src: "/images/meme_6.webp",
+        alt: "Catching profits!",
+        caption: "Catching profits!"
+      },
+      %{
+        src: "/images/meme_7.webp",
+        alt: "Feather your nest",
+        caption: "Feather your nest!"
       }
     ]
   end
@@ -76,14 +98,18 @@ defmodule BirdpawWeb.Page.Index do
           class="welcome-component bg-cover min-h-screen flex items-center justify-center"
           style="background-image: url('/images/image.webp');"
         >
-          <.live_component module={BirdpawWeb.Components.Attributes} id="attributes" />
+          <.live_component
+            module={BirdpawWeb.Components.Attributes}
+            id="attributes"
+            contract_address={@contract_address}
+          />
         </div>
 
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"
         >
-          <h2 class="text-2xl md:text-3xl text-center mb-4 md:mb-6">Fun Memes</h2>
+          <h2 class="text-2xl md:text-3xl text-center mb-6 md:mb-10">Gallery</h2>
 
           <div class="relative w-full max-w-lg md:max-w-3xl mx-auto overflow-hidden">
             <div
@@ -152,6 +178,20 @@ defmodule BirdpawWeb.Page.Index do
             }
           }
         }, 5000);
+
+        const copyButton = document.getElementById("copy-button");
+        const contractAddress = document.getElementById("contract-address").innerText;
+
+        copyButton.addEventListener("click", () => {
+          navigator.clipboard.writeText(contractAddress).then(
+            () => {
+              alert("Contract address copied to clipboard!");
+            },
+            (err) => {
+              console.error("Could not copy text: ", err);
+            }
+          );
+        });
       });
     </script>
     """

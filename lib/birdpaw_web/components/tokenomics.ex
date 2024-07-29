@@ -20,7 +20,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
             <img
               src="/images/tokenomics/distribution.png"
               alt="Distribution Icon"
-              class="w-12 h-12 md:w-16 md:h-16"
+              class="w-16 h-16 md:w-24 md:h-24"
             />
           </div>
           <div class="flex-1">
@@ -50,7 +50,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
             <img
               src="/images/tokenomics/allocation.png"
               alt="Allocation Icon"
-              class="w-12 h-12 md:w-16 md:h-16"
+              class="w-16 h-16 md:w-24 md:h-24"
             />
           </div>
           <div class="flex-1">
@@ -80,7 +80,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
             <img
               src="/images/tokenomics/rewards.png"
               alt="Rewards Icon"
-              class="w-12 h-12 md:w-16 md:h-16"
+              class="w-16 h-16 md:w-24 md:h-24"
             />
           </div>
           <div class="flex-1">

@@ -8,7 +8,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
   def render(assigns) do
     ~H"""
     <div class="tokenomics-section bg-gray-900 text-white py-8 md:py-16">
-      <h2 class="text-center mb-8 md:mb-12 text-xl md:text-3xl font-bold">Tokenomics</h2>
+      <h2 class="text-center mb-8 md:mb-12 text-2xl md:text-3xl">Tokenomics</h2>
 
       <div class="flex flex-col max-w-6xl mx-auto space-y-8 md:space-y-12 px-4 md:px-0">
         <div class="flex items-center bg-gray-800 rounded-lg p-4 md:p-6 shadow-lg">

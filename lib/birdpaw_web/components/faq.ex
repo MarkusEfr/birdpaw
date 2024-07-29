@@ -19,7 +19,7 @@ defmodule BirdpawWeb.Components.FAQ do
   def render(assigns) do
     ~H"""
     <div class="faq-section bg-gray-900 text-white py-16">
-      <h2 class="text-4xl text-center mb-12 font-bold">Frequently Asked Questions</h2>
+      <h2 class="md:text-3xl text-2xl text-center mb-12">Frequently Asked Questions</h2>
 
       <div class="max-w-6xl mx-auto space-y-8 px-4 md:px-0">
         <%= for {question, answer, id} <- @faqs do %>
@@ -31,7 +31,7 @@ defmodule BirdpawWeb.Components.FAQ do
               class="w-full text-left focus:outline-none"
             >
               <div class="flex justify-between items-center">
-                <h3 class="text-lg md:text-2xl font-semibold flex items-center text-white">
+                <h3 class="text-lg md:text-xl font-semibold flex items-center text-white">
                   <svg
                     class="w-5 h-5 md:w-6 md:h-6 mr-2"
                     fill="currentColor"

@@ -62,7 +62,6 @@ defmodule BirdpawWeb.Page.Index do
     ~H"""
     <main class="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 min-h-screen">
       <div class="mx-auto max-w-6xl p-4">
-        <.flash_group flash={@flash} />
         <div
           class="welcome-component bg-cover min-h-screen flex items-center justify-center"
           style="background-image: url('/images/image.webp');"
@@ -109,15 +108,15 @@ defmodule BirdpawWeb.Page.Index do
           </div>
         </div>
 
-        <div id="tokenomics" class="mt-10">
+        <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
         </div>
 
-        <div id="roadmap" class="mt-10">
+        <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Roadmap} id="roadmap" />
         </div>
 
-        <div id="faq" class="mt-10">
+        <div class="mt-10">
           <.live_component
             module={BirdpawWeb.Components.FAQ}
             id="faq"

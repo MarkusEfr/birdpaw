@@ -20,37 +20,43 @@ defmodule BirdpawWeb.Components.Attributes do
         <div class="token-parameters grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:mb-6">
           <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md">
             <img src="/images/attributes/1.png" alt="Name Icon" class="w-12 h-12" />
-            <div>
+            <div class="text-start">
               <p class="font-bold text-lg">Name:</p>
-
               <p class="text-md">Birdcatcher Cats</p>
             </div>
           </div>
 
           <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md">
             <img src="/images/attributes/2.png" alt="Symbol Icon" class="w-12 h-12" />
-            <div>
+            <div class="text-start">
               <p class="font-bold text-lg">Symbol:</p>
-
               <p class="text-md">BIRDPAW</p>
             </div>
           </div>
 
           <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md">
             <img src="/images/attributes/3.png" alt="Total Supply Icon" class="w-12 h-12" />
-            <div>
+            <div class="text-start">
               <p class="font-bold text-lg">Total Supply:</p>
-
               <p class="text-md">1,000,000,000 BIRDPAW</p>
             </div>
           </div>
 
           <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md">
             <img src="/images/attributes/4.png" alt="Network Icon" class="w-12 h-12" />
-            <div>
+            <div class="text-start">
               <p class="font-bold text-lg">Network:</p>
-
               <p class="text-md">Ethereum (ERC-20)</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 p-2 bg-gray-700 rounded-md col-span-1 md:col-span-2">
+            <img src="/images/attributes/contract.webp" alt="Contract Address Icon" class="w-12 h-12" />
+            <div class="text-start">
+              <p class="font-bold text-lg">Contract Address:</p>
+              <p class="text-md">
+                <%= inspect(:crypto.strong_rand_bytes(20) |> Base.encode16(case: :lower)) %>
+              </p>
             </div>
           </div>
         </div>

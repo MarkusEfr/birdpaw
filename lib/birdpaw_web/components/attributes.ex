@@ -30,7 +30,7 @@ defmodule BirdpawWeb.Components.Attributes do
             <img src="/images/attributes/2.png" alt="Symbol Icon" class="w-12 h-12" />
             <div class="text-start">
               <p class="font-bold text-lg">Symbol:</p>
-              <p class="text-md">BIRDPAW</p>
+              <p class="text-md">$BIRDPAW</p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ defmodule BirdpawWeb.Components.Attributes do
         </div>
 
         <button class="buy-button bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full text-lg md:text-2xl transition duration-300 ease-in-out transform hover:scale-105 mt-4">
-          Buy BIRDPAW
+          Buy $BIRDPAW
         </button>
       </div>
     </div>

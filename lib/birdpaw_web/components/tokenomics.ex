@@ -25,7 +25,6 @@ defmodule BirdpawWeb.Components.Tokenomics do
             </p>
 
             <div class="relative w-full bg-gray-700 rounded-full h-8 overflow-hidden">
-              a
               <div
                 class="absolute top-0 left-0 h-full bg-blue-500 text-center text-white text-sm font-bold leading-8"
                 style="width: 50%"
@@ -68,7 +67,7 @@ defmodule BirdpawWeb.Components.Tokenomics do
             <div class="relative w-full bg-gray-700 rounded-full h-8 overflow-hidden">
               <div
                 class="absolute top-0 left-0 h-full bg-purple-500 text-center text-white text-sm font-bold leading-8"
-                style="width: 25%"
+                style="width: 15%"
               >
                 <span class="absolute inset-0 flex items-center justify-center">15%</span>
               </div>

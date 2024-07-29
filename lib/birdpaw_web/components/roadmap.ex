@@ -24,7 +24,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             <p class="text-lg text-blue-400 mb-4">Phase 1 (Done)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Official Launch:</span>
-              The Birdcatcher Cats (BIRDPAW) project officially launched with successful token distribution and initial marketing campaigns. The community has been engaged and early supporters onboarded.
+              The Birdcatcher Cats ($BIRDPAW) project officially launched with successful token distribution and initial marketing campaigns. The community has been engaged and early supporters onboarded.
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             <p class="text-lg text-green-400 mb-4">Phase 2 (In Progress)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Building the Future:</span>
-              We are currently developing the BIRDPAW platform. This includes integrating a user-friendly wallet, enhancing UI/UX design, and creating robust backend support. Stay tuned for exciting features!
+              We are currently developing the $BIRDPAW platform. This includes integrating a user-friendly wallet, enhancing UI/UX design, and creating robust backend support. Stay tuned for exciting features!
             </p>
           </div>
         </div>
@@ -52,7 +52,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             <p class="text-lg text-purple-400 mb-4">Phase 3 (Upcoming)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Gaining Traction:</span>
-              Our goal is to list BIRDPAW on major cryptocurrency exchanges to boost liquidity and accessibility. We're in talks with multiple exchanges and preparing for a significant expansion.
+              Our goal is to list $BIRDPAW on major cryptocurrency exchanges to boost liquidity and accessibility. We're in talks with multiple exchanges and preparing for a significant expansion.
             </p>
           </div>
         </div>
@@ -66,7 +66,7 @@ defmodule BirdpawWeb.Components.Roadmap do
             <p class="text-lg text-orange-400 mb-4">Phase 4 (Upcoming)</p>
             <p class="text-md text-gray-300">
               <span class="font-bold text-yellow-300">Explore & Trade:</span>
-              Launching an exclusive NFT marketplace for BIRDPAW-themed assets. Users will be able to create, trade, and collect unique NFTs. We're collaborating with artists to bring you one-of-a-kind digital collectibles.
+              Launching an exclusive NFT marketplace for $BIRDPAW-themed assets. Users will be able to create, trade, and collect unique NFTs. We're collaborating with artists to bring you one-of-a-kind digital collectibles.
             </p>
           </div>
         </div>

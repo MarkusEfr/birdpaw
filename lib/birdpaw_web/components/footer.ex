@@ -9,12 +9,12 @@ defmodule BirdpawWeb.Components.Footer do
     ~H"""
     <footer class="bg-gray-900 text-white py-8">
       <div class="max-w-6xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
           <div class="text-center md:text-left mb-4 md:mb-0">
-            <h3 class="text-xl font-semibold">Birdcatcher Cats</h3>
             <p>© 2024 Birdcatcher Cats. All rights reserved.</p>
           </div>
-          <div class="flex space-x-6">
+
+          <div class="flex flex-wrap justify-center md:justify-start space-x-4 space-y-2 md:space-y-0">
             <a
               href="https://github.com"
               target="_blank"
@@ -31,6 +31,7 @@ defmodule BirdpawWeb.Components.Footer do
               </svg>
               <span>GitHub</span>
             </a>
+
             <a
               href="https://twitter.com"
               target="_blank"
@@ -47,6 +48,7 @@ defmodule BirdpawWeb.Components.Footer do
               </svg>
               <span>Twitter</span>
             </a>
+
             <a
               href="https://t.me"
               target="_blank"
@@ -63,7 +65,7 @@ defmodule BirdpawWeb.Components.Footer do
               </svg>
               <span>Telegram</span>
             </a>
-            <a
+            <%!-- <a
               href={~p"/docs/whitepaper.pdf"}
               target="_blank"
               aria-label="Whitepaper"
@@ -78,7 +80,7 @@ defmodule BirdpawWeb.Components.Footer do
                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1 18H9v-2h2v2zm1.36-4.36c-.8.37-1.2.9-1.2 1.55h-2c0-.85.38-1.54 1.14-2.05.55-.37.85-.73.85-1.18 0-.38-.25-.69-.64-.69-.48 0-.76.31-.76.74h-2c0-1.59 1.2-2.5 2.78-2.5 1.44 0 2.5.88 2.5 2.09 0 .88-.47 1.41-1.22 1.86z" />
               </svg>
               <span>Whitepaper</span>
-            </a>
+            </a> --%>
           </div>
         </div>
       </div>

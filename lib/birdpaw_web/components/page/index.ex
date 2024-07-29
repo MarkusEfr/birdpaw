@@ -6,7 +6,23 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :current_slide, 0)}
+    {:ok,
+     assign(socket,
+       current_slide: 0,
+       faqs: [
+         {"What is Birdcatcher Cats?",
+          "Birdcatcher Cats ($BIRDPAW) is a fun and engaging meme token built on the Ethereum blockchain.",
+          "1"},
+         {"How can I buy $BIRDPAW?",
+          "You can purchase $BIRDPAW on major cryptocurrency exchanges where it is listed.", "2"},
+         {"What is the total supply of $BIRDPAW?",
+          "$BIRDPAW has a total supply of 1,000,000,000 tokens.", "3"},
+         {"What are the future plans for Birdcatcher Cats?",
+          "We plan to develop a platform with wallet integration, list on major exchanges, and launch an NFT marketplace.",
+          "4"}
+       ],
+       expanded: false
+     )}
   end
 
   @impl true
@@ -53,13 +69,13 @@ defmodule BirdpawWeb.Page.Index do
         >
           <.live_component module={BirdpawWeb.Components.Attributes} id="attributes" />
         </div>
-        
+
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"
         >
           <h2 class="text-2xl md:text-3xl text-center mb-4 md:mb-6">Fun Memes</h2>
-          
+
           <div class="relative w-full max-w-lg md:max-w-3xl mx-auto overflow-hidden">
             <div
               class="flex transition-transform duration-500"
@@ -72,7 +88,7 @@ defmodule BirdpawWeb.Page.Index do
                 </div>
               <% end %>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 left-0 ml-2">
               <button
                 phx-click="prev_slide"
@@ -81,7 +97,7 @@ defmodule BirdpawWeb.Page.Index do
                 ‹
               </button>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 right-0 mr-2">
               <button
                 phx-click="next_slide"
@@ -92,15 +108,24 @@ defmodule BirdpawWeb.Page.Index do
             </div>
           </div>
         </div>
-        
+
         <div id="tokenomics" class="mt-10">
           <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
         </div>
-        
+
         <div id="roadmap" class="mt-10">
           <.live_component module={BirdpawWeb.Components.Roadmap} id="roadmap" />
         </div>
-        
+
+        <div id="faq" class="mt-10">
+          <.live_component
+            module={BirdpawWeb.Components.FAQ}
+            id="faq"
+            faqs={@faqs}
+            expanded={@expanded}
+          />
+        </div>
+
         <div id="footer" class="mt-10">
           <.live_component module={BirdpawWeb.Components.Footer} id="footer" />
         </div>

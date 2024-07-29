@@ -63,6 +63,22 @@ defmodule BirdpawWeb.Components.Footer do
               </svg>
               <span>Telegram</span>
             </a>
+            <a
+              href={~p"/docs/whitepaper.pdf"}
+              target="_blank"
+              aria-label="Whitepaper"
+              class="flex items-center space-x-2 hover:text-gray-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1 18H9v-2h2v2zm1.36-4.36c-.8.37-1.2.9-1.2 1.55h-2c0-.85.38-1.54 1.14-2.05.55-.37.85-.73.85-1.18 0-.38-.25-.69-.64-.69-.48 0-.76.31-.76.74h-2c0-1.59 1.2-2.5 2.78-2.5 1.44 0 2.5.88 2.5 2.09 0 .88-.47 1.41-1.22 1.86z" />
+              </svg>
+              <span>Whitepaper</span>
+            </a>
           </div>
         </div>
       </div>

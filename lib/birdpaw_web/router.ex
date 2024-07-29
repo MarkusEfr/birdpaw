@@ -18,6 +18,8 @@ defmodule BirdpawWeb.Router do
     pipe_through :browser
 
     live("/", Page.Index)
+
+    get("/docs/:filename", WhitepaperController, :open_whitepaper)
   end
 
   # Other scopes may use custom stacks.

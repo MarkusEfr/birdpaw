@@ -1,28 +1,31 @@
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
-
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
-
-// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-import "phoenix_html"
-// Establish Phoenix Socket and LiveView configuration.
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 let hooks = {}
+
+hooks.ScrollReveal = {
+  mounted() {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    }
+
+    const callback = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fadeInUp')
+          observer.unobserve(entry.target)
+        }
+      })
+    }
+
+    const observer = new IntersectionObserver(callback, options)
+    const items = document.querySelectorAll('.timeline-item')
+    items.forEach(item => observer.observe(item))
+  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
@@ -44,4 +47,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

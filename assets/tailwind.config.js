@@ -11,14 +11,14 @@ module.exports = {
         'scrollbar-thumb': '#333333', // Lighter dark color for the thumb
         'scrollbar-thumb-hover': '#4d4d4d', // Hover color for the thumb
       },
+      animation: {
+        fadeInUp: 'fadeInUp 2s ease-out forwards',
+      },
       keyframes: {
         fadeInUp: {
           '0%': { opacity: 0, transform: 'translateY(20px)' },
           '100%': { opacity: 1, transform: 'translateY(0)' },
         },
-      },
-      animation: {
-        fadeInUp: 'fadeInUp 2s ease-out', // Slower duration for a more professional effect
       },
     },
   },

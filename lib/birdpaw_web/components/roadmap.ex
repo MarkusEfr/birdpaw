@@ -11,11 +11,11 @@ defmodule BirdpawWeb.Components.Roadmap do
       class="roadmap-section py-16 bg-fixed"
       style="background-image: url('/images/roadmap-bg.webp');"
     >
-      <div class="max-w-6xl mx-auto relative px-4">
+      <div class="max-w-6xl mx-auto relative px-4" phx-hook="ScrollReveal" id="timeline">
         <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 bg-gradient-to-b from-gray-600 to-gray-800 w-1 h-full">
         </div>
 
-        <div class="timeline-item relative flex flex-col items-center mb-16">
+        <div class="timeline-item relative flex flex-col items-center mb-16 opacity-0">
           <div class="timeline-icon bg-blue-600 text-white rounded-full p-4 mb-4 shadow-lg flex items-center justify-center text-2xl font-bold">
             1
           </div>
@@ -29,7 +29,7 @@ defmodule BirdpawWeb.Components.Roadmap do
           </div>
         </div>
 
-        <div class="timeline-item relative flex flex-col items-center mb-16">
+        <div class="timeline-item relative flex flex-col items-center mb-16 opacity-0">
           <div class="timeline-icon bg-green-600 text-white rounded-full p-4 mb-4 shadow-lg flex items-center justify-center text-2xl font-bold">
             2
           </div>
@@ -43,7 +43,7 @@ defmodule BirdpawWeb.Components.Roadmap do
           </div>
         </div>
 
-        <div class="timeline-item relative flex flex-col items-center mb-16">
+        <div class="timeline-item relative flex flex-col items-center mb-16 opacity-0">
           <div class="timeline-icon bg-purple-600 text-white rounded-full p-4 mb-4 shadow-lg flex items-center justify-center text-2xl font-bold">
             3
           </div>
@@ -57,7 +57,7 @@ defmodule BirdpawWeb.Components.Roadmap do
           </div>
         </div>
 
-        <div class="timeline-item relative flex flex-col items-center mb-16">
+        <div class="timeline-item relative flex flex-col items-center mb-16 opacity-0">
           <div class="timeline-icon bg-orange-600 text-white rounded-full p-4 mb-4 shadow-lg flex items-center justify-center text-2xl font-bold">
             4
           </div>

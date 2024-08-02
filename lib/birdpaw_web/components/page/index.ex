@@ -28,7 +28,7 @@ defmodule BirdpawWeb.Page.Index do
        ],
        expanded: false,
        # Replace with your actual contract address
-       contract_address: "0x1234567890abcdef1234567890abcdef12345678"
+       contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800"
      )}
   end
 
@@ -50,11 +50,6 @@ defmodule BirdpawWeb.Page.Index do
     # 5 seconds interval
     Process.send_after(self(), :auto_slide, 5000)
     {:noreply, assign(socket, :current_slide, new_slide)}
-  end
-
-  @impl true
-  def handle_event("copy_address", %{"address" => address}, socket) do
-    {:noreply, push_event(socket, "copy_to_clipboard", %{address: address})}
   end
 
   defp slides do
@@ -107,13 +102,13 @@ defmodule BirdpawWeb.Page.Index do
             contract_address={@contract_address}
           />
         </div>
-        
+
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"
         >
           <h2 class="text-2xl md:text-3xl text-center mb-6 md:mb-10">Gallery</h2>
-          
+
           <div class="relative w-full max-w-lg md:max-w-3xl mx-auto overflow-hidden">
             <div
               class="flex transition-transform duration-500"
@@ -126,7 +121,7 @@ defmodule BirdpawWeb.Page.Index do
                 </div>
               <% end %>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 left-0 ml-2">
               <button
                 phx-click="prev_slide"
@@ -135,7 +130,7 @@ defmodule BirdpawWeb.Page.Index do
                 ‹
               </button>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 right-0 mr-2">
               <button
                 phx-click="next_slide"
@@ -146,15 +141,15 @@ defmodule BirdpawWeb.Page.Index do
             </div>
           </div>
         </div>
-        
+
         <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
         </div>
-        
+
         <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Roadmap} id="roadmap" />
         </div>
-        
+
         <div class="mt-10">
           <.live_component
             module={BirdpawWeb.Components.FAQ}
@@ -163,7 +158,7 @@ defmodule BirdpawWeb.Page.Index do
             expanded={@expanded}
           />
         </div>
-        
+
         <div id="footer">
           <.live_component module={BirdpawWeb.Components.Footer} id="footer" />
         </div>

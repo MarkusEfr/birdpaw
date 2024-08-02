@@ -45,6 +45,11 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
+  def handle_event("copy_address", %{"address" => address}, socket) do
+    {:noreply, push_event(socket, "copy_to_clipboard", %{address: address})}
+  end
+
+  @impl true
   def handle_info(:auto_slide, socket) do
     new_slide = rem(socket.assigns.current_slide + 1, length(slides()))
     # 5 seconds interval

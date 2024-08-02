@@ -67,6 +67,22 @@ defmodule BirdpawWeb.Components.Footer do
               </svg>
               <span>Medium</span>
             </a>
+
+            <a
+              href="mailto:birdpaw@proton.me"
+              aria-label="Email"
+              class="flex items-center space-x-2 hover:text-gray-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 12.713L0 4.237V19c0 1.105.895 2 2 2h20c1.105 0 2-.895 2-2V4.237l-12 8.476zm12-10.15V3c0-1.105-.895-2-2-2H2C.895 1 0 1.895 0 3v.563l12 8.475 12-8.475z" />
+              </svg>
+              <span>birdpaw@proton.me</span>
+            </a>
           </div>
         </div>
       </div>

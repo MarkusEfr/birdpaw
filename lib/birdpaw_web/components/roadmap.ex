@@ -43,8 +43,8 @@ defmodule BirdpawWeb.Components.Roadmap do
             <p class="text-lg text-green-400 mb-4">Phase 2 (Done)</p>
 
             <p class="text-md text-gray-300">
-              <span class="font-bold text-yellow-300">Building the Future:</span>
-              The $BIRDPAW platform has been developed. This includes a user-friendly wallet, enhanced UI/UX design, and robust backend support.
+              <span class="font-bold text-yellow-300">Engaging the Community:</span>
+              We've built a dynamic and engaging platform for $BIRDPAW, designed to bring the community together. This phase included enhancing user interaction, optimizing the platform’s interface, and ensuring seamless integration with various community-driven activities.
             </p>
           </div>
         </div>

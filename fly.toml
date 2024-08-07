@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for birdpaw on 2024-07-28T23:36:58+03:00
+# fly.toml app configuration file generated for birdpaw on 2024-08-07T21:56:43+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'birdpaw'
-primary_region = 'waw'
+primary_region = 'ams'
 kill_signal = 'SIGTERM'
 
 [build]
@@ -30,4 +30,6 @@ kill_signal = 'SIGTERM'
     soft_limit = 1000
 
 [[vm]]
-  size = 'shared-cpu-1x'
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

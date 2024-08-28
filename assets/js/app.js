@@ -29,43 +29,6 @@ hooks.ScrollReveal = {
 }
 
 hooks.AnimateOnScroll = AnimateOnScroll
-hooks.PromoAnimation = {
-  mounted() {
-    // Initially hide the elements
-    const promoHeader = this.el.querySelector('#promo-header');
-    const promoMemeText = this.el.querySelector('#promo-meme-text');
-
-    if (promoHeader) {
-      promoHeader.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-1000', 'ease-out');
-    }
-    if (promoMemeText) {
-      promoMemeText.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-1000', 'ease-out');
-    }
-
-    // Fade in and scale up the elements smoothly
-    setTimeout(() => {
-      if (promoHeader) {
-        promoHeader.classList.remove('opacity-0', 'scale-95');
-        promoHeader.classList.add('opacity-100', 'scale-100');
-      }
-      if (promoMemeText) {
-        promoMemeText.classList.remove('opacity-0', 'scale-95');
-        promoMemeText.classList.add('opacity-100', 'scale-100');
-      }
-    }, 500);
-
-    // Stop animation after elements are fully shown
-    setTimeout(() => {
-      if (promoHeader) {
-        promoHeader.classList.remove('animate-pulse');
-      }
-      if (promoMemeText) {
-        promoMemeText.classList.remove('animate-bounce');
-      }
-    }, 1500);
-  }
-}
-
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })

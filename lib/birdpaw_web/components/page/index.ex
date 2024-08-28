@@ -28,7 +28,11 @@ defmodule BirdpawWeb.Page.Index do
        ],
        expanded: false,
        # Replace with your actual contract address
-       contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800"
+       contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800",
+       toggle_buy_token: false,
+       session_id: nil,
+       eth_amount: 0.0,
+       qr_code_base64: nil
      )}
   end
 
@@ -107,13 +111,20 @@ defmodule BirdpawWeb.Page.Index do
             contract_address={@contract_address}
           />
         </div>
-         <.live_component module={BirdpawWeb.Components.Promo} id="promo" />
+        <.live_component
+          module={BirdpawWeb.Components.Promo}
+          id="promo"
+          toggle_buy_token={@toggle_buy_token}
+          session_id={@session_id}
+          eth_amount={@eth_amount}
+          qr_code_base64={@qr_code_base64}
+        />
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"
         >
           <h2 class="text-2xl md:text-3xl text-center mb-6 md:mb-10">Gallery</h2>
-          
+
           <div class="relative w-full max-w-lg md:max-w-3xl mx-auto overflow-hidden">
             <div
               class="flex transition-transform duration-500"
@@ -126,7 +137,7 @@ defmodule BirdpawWeb.Page.Index do
                 </div>
               <% end %>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 left-0 ml-2">
               <button
                 phx-click="prev_slide"
@@ -135,7 +146,7 @@ defmodule BirdpawWeb.Page.Index do
                 ‹
               </button>
             </div>
-            
+
             <div class="absolute top-1/2 transform -translate-y-1/2 right-0 mr-2">
               <button
                 phx-click="next_slide"
@@ -146,15 +157,15 @@ defmodule BirdpawWeb.Page.Index do
             </div>
           </div>
         </div>
-        
+
         <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Tokenomics} id="tokenomics" />
         </div>
-        
+
         <div class="mt-10">
           <.live_component module={BirdpawWeb.Components.Roadmap} id="roadmap" />
         </div>
-        
+
         <div class="mt-10">
           <.live_component
             module={BirdpawWeb.Components.FAQ}
@@ -163,7 +174,7 @@ defmodule BirdpawWeb.Page.Index do
             expanded={@expanded}
           />
         </div>
-        
+
         <div id="footer">
           <.live_component module={BirdpawWeb.Components.Footer} id="footer" />
         </div>

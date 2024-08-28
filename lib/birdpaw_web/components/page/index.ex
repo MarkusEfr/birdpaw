@@ -30,9 +30,13 @@ defmodule BirdpawWeb.Page.Index do
        # Replace with your actual contract address
        contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800",
        toggle_buy_token: false,
-       session_id: nil,
-       eth_amount: 0.0,
-       qr_code_base64: nil
+       presale_form: %{
+         session_id: nil,
+         eth_address: nil,
+         birdpaw_amount: nil,
+         eth_amount: 0.0,
+         qr_code_base64: nil
+       }
      )}
   end
 
@@ -115,9 +119,7 @@ defmodule BirdpawWeb.Page.Index do
           module={BirdpawWeb.Components.Promo}
           id="promo"
           toggle_buy_token={@toggle_buy_token}
-          session_id={@session_id}
-          eth_amount={@eth_amount}
-          qr_code_base64={@qr_code_base64}
+          presale_form={@presale_form}
         />
         <div
           id="memes"

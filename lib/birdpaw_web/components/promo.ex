@@ -23,13 +23,23 @@ defmodule BirdpawWeb.Components.Promo do
     eth_amount = birdpaw_amount / 3_000_000
 
     # Generate the QR code data based on ETH amount and address
-    qr_code_data = generate_qr_code(eth_amount, eth_address)
+    qr_code_binary =
+      case {eth_address, eth_amount} do
+        {"", _} -> nil
+        {_, ""} -> nil
+        _ -> generate_qr_code(eth_amount, eth_address)
+      end
+
+    IO.inspect(qr_code_binary, label: "qr_code_binary")
+    IO.inspect(eth_amount, label: "eth_amount")
+    IO.inspect(eth_address, label: "eth_address")
 
     presale_form = %{
       eth_amount: eth_amount,
       eth_address: eth_address,
       birdpaw_amount: birdpaw_amount,
-      qr_code_base64: qr_code_data
+      qr_code_base64: qr_code_binary,
+      show_link: "/payments/qr_code_#{eth_address}.png"
     }
 
     {:noreply, assign(socket, presale_form: presale_form)}
@@ -44,9 +54,9 @@ defmodule BirdpawWeb.Components.Promo do
       payment_uri
       |> QRCode.create()
       |> QRCode.render(:png, png_settings)
-      |> QRCode.save("qr_code_#{eth_address}.png")
+      |> QRCode.save("priv/payments/qr_code_#{eth_address}.png")
 
-    QRCode.to_base64(qr_code_binary)
+    qr_code_binary
   end
 
   @impl true
@@ -144,12 +154,11 @@ defmodule BirdpawWeb.Components.Promo do
                 class="bg-gray-100"
               />
               <!-- QR Code Section -->
-              <div class="mb-4 text-center">
-                <%= if @presale_form[:eth_amount] > 0.0 and @presale_form[:qr_code_base64] do %>
+              <div class="mb-4 text-center flex flex-col">
+                <%= if @presale_form[:eth_amount] > 0.0 and @presale_form[:eth_address] |> String.trim() != ""  and @presale_form[:qr_code_base64] != nil do %>
                   <img
-                    src={"data:image/svg+xml;base64,#{@presale_form[:qr_code_base64]}"}
-                    alt="QR Code"
-                    class="mx-auto"
+                    src={~p"/payments/qr_code_0xDc484b655b157387B493DFBeDbeC4d44A248566F.png"}
+                    alt="QR code"
                   />
                   <p class="text-sm text-gray-600 mt-2">Scan the QR code to make the payment.</p>
                 <% else %>

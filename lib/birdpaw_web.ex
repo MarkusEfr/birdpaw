@@ -17,7 +17,8 @@ defmodule BirdpawWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts whitepaper.pdf images favicon.ico robots.txt docs qr_code_*.png)
+  def static_paths,
+    do: ~w(assets fonts whitepaper.pdf images favicon.ico robots.txt docs payments qr_code_*.png)
 
   def router do
     quote do

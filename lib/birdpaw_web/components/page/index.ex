@@ -35,7 +35,8 @@ defmodule BirdpawWeb.Page.Index do
          eth_address: nil,
          birdpaw_amount: nil,
          eth_amount: 0.0,
-         qr_code_base64: nil
+         qr_code_base64: nil,
+         is_confirmed?: false
        }
      )}
   end
@@ -211,5 +212,10 @@ defmodule BirdpawWeb.Page.Index do
       });
     </script>
     """
+  end
+
+  defp generate_session_id do
+    # Use a simple way to generate a unique session ID
+    :crypto.strong_rand_bytes(16) |> Base.encode64() |> binary_part(0, 16)
   end
 end

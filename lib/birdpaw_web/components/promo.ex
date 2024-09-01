@@ -6,10 +6,14 @@ defmodule BirdpawWeb.Components.Promo do
   for payment.
   """
   use BirdpawWeb, :live_component
-  import BirdpawWeb.CoreComponents, only: [simple_form: 1, input: 1, button: 1]
+  import BirdpawWeb.CoreComponents, only: [input: 1, button: 1]
   import Birdpaw.Presale
 
   @currencies ["ETH", "USDT", "BTC"]
+
+  @eth_conversion_rate 6_000_000
+
+  @usdt_conversion_rate 0.00042
 
   @impl true
   def handle_event(
@@ -82,7 +86,11 @@ defmodule BirdpawWeb.Components.Promo do
         %{"payment_method" => payment_method},
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
-    {:noreply, assign(socket, presale_form: %{presale_form | payment_method: payment_method})}
+    birdpaw_amount = presale_form[:birdpaw_amount] || 0
+    amount = calculate_amount(birdpaw_amount, payment_method)
+    updated_presale_form = %{presale_form | payment_method: payment_method, amount: amount}
+
+    {:noreply, assign(socket, presale_form: updated_presale_form)}
   end
 
   @impl true
@@ -100,20 +108,17 @@ defmodule BirdpawWeb.Components.Promo do
         },
         socket
       ) do
-    birdpaw_amount = String.to_integer(birdpaw_amount)
-
-    # Set conversion rates (example: 1 USDT = 0.00033 ETH, adjust these as needed)
-    eth_conversion_rate = 3_000_000
-    usdt_conversion_rate = 0.00033
+    birdpaw_amount =
+      String.to_integer(birdpaw_amount)
 
     # Calculate amount based on selected currency
     amount =
       case payment_method do
         "ETH" ->
-          birdpaw_amount / eth_conversion_rate
+          birdpaw_amount / get_eth_conversion_rate()
 
         "USDT" ->
-          birdpaw_amount * usdt_conversion_rate
+          birdpaw_amount * get_usdt_conversion_rate()
 
         _ ->
           0
@@ -157,6 +162,7 @@ defmodule BirdpawWeb.Components.Promo do
     qr_code_binary
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div id="promo-section" class="text-white py-8 sm:py-12 md:py-20 bg-gray-900">
@@ -397,5 +403,21 @@ defmodule BirdpawWeb.Components.Promo do
     """
   end
 
-  defp get_currency_options, do: @currencies
+  defp get_usdt_conversion_rate, do: @usdt_conversion_rate
+
+  defp get_eth_conversion_rate, do: @eth_conversion_rate
+
+  defp calculate_amount(birdpaw_amount, "ETH") do
+    eth_conversion_rate = 6_000_000
+    birdpaw_amount / eth_conversion_rate
+  end
+
+  defp calculate_amount(birdpaw_amount, "USDT") do
+    usdt_conversion_rate = 0.00042
+    birdpaw_amount * usdt_conversion_rate
+  end
+
+  defp calculate_amount(_birdpaw_amount, _payment_method) do
+    0
+  end
 end

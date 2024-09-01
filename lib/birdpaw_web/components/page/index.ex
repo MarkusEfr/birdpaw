@@ -32,11 +32,12 @@ defmodule BirdpawWeb.Page.Index do
        toggle_buy_token: false,
        presale_form: %{
          session_id: nil,
-         eth_address: nil,
+         wallet_address: nil,
          birdpaw_amount: nil,
-         eth_amount: 0.0,
+         amount: 0.0,
          qr_code_base64: nil,
-         is_confirmed?: false
+         is_confirmed?: false,
+         payment_method: "ETH"
        }
      )}
   end
@@ -212,10 +213,5 @@ defmodule BirdpawWeb.Page.Index do
       });
     </script>
     """
-  end
-
-  defp generate_session_id do
-    # Use a simple way to generate a unique session ID
-    :crypto.strong_rand_bytes(16) |> Base.encode64() |> binary_part(0, 16)
   end
 end

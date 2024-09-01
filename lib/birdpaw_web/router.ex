@@ -14,6 +14,12 @@ defmodule BirdpawWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/api", BirdpawWeb do
+    pipe_through :api
+
+    resources "/presale_orders", PresaleOrderController, only: [:new]
+  end
+
   scope "/", BirdpawWeb do
     pipe_through :browser
 

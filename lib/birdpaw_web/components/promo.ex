@@ -7,29 +7,82 @@ defmodule BirdpawWeb.Components.Promo do
   """
   use BirdpawWeb, :live_component
   import BirdpawWeb.CoreComponents, only: [simple_form: 1, input: 1, button: 1]
+  import Birdpaw.Presale
+
+  @currencies ["ETH", "USDT", "BTC"]
 
   @impl true
   def handle_event(
         "confirm-buy-token",
         %{
           "birdpaw_amount" => birdpaw_amount,
-          "eth_address" => eth_address,
-          "eth_amount" => eth_amount
+          "wallet_address" => wallet_address,
+          "payment_method" => payment_method,
+          "amount" => amount
         } = _params,
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
-    order_uuid = Ecto.UUID.generate() |> Base.encode16(case: :lower)
+    # Fetch all previous orders for this address
+    previous_orders = get_orders_by_wallet_address(wallet_address)
+    IO.inspect(previous_orders)
 
-    order = %{
-      eth_address: eth_address,
-      birdpaw_amount: birdpaw_amount,
-      eth_amount: eth_amount,
-      is_confirmed?: true,
-      timestamp: Timex.now() |> Timex.format!("%Y-%m-%d %H:%M:%S", :strftime),
-      uuid: order_uuid
-    }
+    # Check if the user has made more than 10 orders
+    if length(previous_orders) >= 10 do
+      # Return an error if the user has more than 10 orders
+      {:noreply,
+       socket
+       |> put_flash(:error, "You have reached the maximum number of orders.")
+       |> assign(presale_form: presale_form)}
+    else
+      # Check if the new order's payment_method and amount match any previous order
+      matching_order =
+        Enum.find(previous_orders, fn order ->
+          order.payment_method == payment_method && order.amount == amount
+        end)
 
-    {:noreply, socket |> assign(order: order, presale_form: Map.merge(presale_form, order))}
+      if matching_order do
+        # Return an error if a matching order is found
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "You have already placed an order with the same payment method and amount."
+         )
+         |> assign(presale_form: presale_form)}
+      else
+        # If validations pass, proceed with order creation
+        order_uuid = Ecto.UUID.generate() |> Base.encode16(case: :lower)
+
+        order = %{
+          wallet_address: wallet_address,
+          birdpaw_amount: birdpaw_amount,
+          payment_method: payment_method,
+          amount: amount,
+          is_confirmed?: true,
+          timestamp: DateTime.utc_now(),
+          uuid: order_uuid,
+          order_state: "confirmed"
+        }
+
+        # Insert the new order into the database
+        {:ok, created_order} = create_presale_order(order)
+
+        IO.inspect(created_order, label: "order")
+
+        {:noreply,
+         socket
+         |> put_flash(:success, "Order confirmed successfully!")
+         |> assign(order: order, presale_form: Map.merge(presale_form, order))}
+      end
+    end
+  end
+
+  def handle_event(
+        "select-payment_method",
+        %{"payment_method" => payment_method},
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    {:noreply, assign(socket, presale_form: %{presale_form | payment_method: payment_method})}
   end
 
   @impl true
@@ -40,29 +93,51 @@ defmodule BirdpawWeb.Components.Promo do
   @impl true
   def handle_event(
         "calculate-eth",
-        %{"birdpaw_amount" => birdpaw_amount, "eth_address" => eth_address},
+        %{
+          "birdpaw_amount" => birdpaw_amount,
+          "wallet_address" => wallet_address,
+          "payment_method" => payment_method
+        },
         socket
       ) do
     birdpaw_amount = String.to_integer(birdpaw_amount)
-    eth_amount = birdpaw_amount / 3_000_000
-    wei_amount = (eth_amount * 1_000_000_000_000_000_000) |> round()
 
-    # Generate the QR code data based on ETH amount and address
+    # Set conversion rates (example: 1 USDT = 0.00033 ETH, adjust these as needed)
+    eth_conversion_rate = 3_000_000
+    usdt_conversion_rate = 0.00033
+
+    # Calculate amount based on selected currency
+    amount =
+      case payment_method do
+        "ETH" ->
+          birdpaw_amount / eth_conversion_rate
+
+        "USDT" ->
+          birdpaw_amount * usdt_conversion_rate
+
+        _ ->
+          0
+      end
+
+    wei_amount = (amount * 1_000_000_000_000_000_000) |> round()
+
+    # Generate the QR code data based on the selected payment_method, amount, and address
     qr_code_binary =
-      case {eth_address, eth_amount} do
+      case {wallet_address, wei_amount} do
         {"", _} -> nil
         {_, ""} -> nil
-        _ -> generate_qr_code(wei_amount, eth_address)
+        _ -> generate_qr_code(wei_amount, wallet_address)
       end
 
     presale_form = %{
-      eth_amount: eth_amount,
+      amount: amount,
       wei_amount: wei_amount,
-      eth_address: eth_address,
+      wallet_address: wallet_address,
       birdpaw_amount: birdpaw_amount,
       qr_code_base64: qr_code_binary,
-      show_link: "/payments/qr_code_#{eth_address}.png",
-      is_confirmed?: false
+      show_link: "/payments/qr_code_#{wallet_address}.png",
+      is_confirmed?: false,
+      payment_method: payment_method
     }
 
     {:noreply, assign(socket, presale_form: presale_form)}
@@ -177,63 +252,100 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp order_form(assigns) do
     ~H"""
-    <.simple_form
+    <.form
       for={@presale_form}
       phx-change="calculate-eth"
       phx-target={@myself}
       phx-submit="confirm-buy-token"
-      class="space-y-4"
+      class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-xl"
     >
-      <.input
-        field={@presale_form[:birdpaw_amount]}
-        name="birdpaw_amount"
-        type="number"
-        label="Amount of $BIRDPAW"
-        placeholder="Enter amount"
-        min="100000"
-        step="1000"
-        class="bg-gray-800 text-white border border-gray-600 placeholder-gray-500 focus:border-teal-400 focus:ring-teal-400 rounded-lg shadow-sm p-2 w-full"
-        value={@presale_form[:birdpaw_amount]}
-        required
-      />
-
-      <.input
-        field={@presale_form[:eth_address]}
-        name="eth_address"
-        type="text"
-        label="Your ETH Address"
-        placeholder="Enter your ETH address"
-        class="bg-gray-800 text-white border border-gray-600 placeholder-gray-500 focus:border-teal-400 focus:ring-teal-400 rounded-lg shadow-sm p-2 w-full"
-        value={@presale_form[:eth_address]}
-        required
-      />
-
-      <.input
-        field={@presale_form[:eth_amount]}
-        name="eth_amount"
-        type="text"
-        label="ETH to Pay"
-        readonly
-        class="bg-gray-900 text-white border border-gray-600 placeholder-gray-500 focus:border-teal-400 focus:ring-teal-400 rounded-lg shadow-sm p-2 w-full"
-        value={@presale_form[:eth_amount]}
-        placeholder="0 ETH"
-      />
-
-      <:actions>
+      <!-- Form Header -->
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">Buy $BIRDPAW</h2>
+      </div>
+      <!-- Amount of $BIRDPAW -->
+      <div class="space-y-2">
+        <label class="text-white">Amount of $BIRDPAW</label>
+        <.input
+          field={@presale_form[:birdpaw_amount]}
+          value={@presale_form[:birdpaw_amount] || 100_000}
+          name="birdpaw_amount"
+          type="number"
+          placeholder="Enter amount"
+          min="100000"
+          step="1000"
+          class="bg-gray-700 text-white border border-teal-500 placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500 rounded-lg p-3 w-full"
+          required
+        />
+      </div>
+      <!-- Wallet Address -->
+      <div class="space-y-2">
+        <label class="text-white">Your Wallet Address</label>
+        <.input
+          field={@presale_form[:wallet_address]}
+          value={@presale_form[:wallet_address] || ""}
+          name="wallet_address"
+          type="text"
+          placeholder="Enter your wallet address"
+          class="bg-gray-700 text-white border border-teal-500 placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500 rounded-lg p-3 w-full"
+          required
+        />
+      </div>
+      <!-- Payment Method Selection -->
+      <div class="space-y-2">
+        <label class="text-white">Payment Method</label>
+        <div class="flex justify-center space-x-4 py-2">
+          <div
+            id="payment_method-eth"
+            phx-click="select-payment_method"
+            phx-value-payment_method="ETH"
+            phx-target={@myself}
+            class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "ETH", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
+          >
+            ETH
+          </div>
+          <div
+            id="payment_method-usdt"
+            phx-click="select-payment_method"
+            phx-value-payment_method="USDT"
+            phx-target={@myself}
+            class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "USDT", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
+          >
+            USDT
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="payment_method"
+          id="payment_method-input"
+          value={@presale_form[:payment_method] || "ETH"}
+        />
+      </div>
+      <!-- Amount -->
+      <div class="space-y-2">
+        <label class="text-teal-300">Amount to Pay</label>
+        <.input
+          field={@presale_form[:amount]}
+          value={@presale_form[:amount] || 0.0}
+          name="amount"
+          type="text"
+          readonly
+          class="bg-gray-700 text-white border border-teal-500 placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500 rounded-lg p-3 w-full"
+        />
+      </div>
+      <!-- Submit Button -->
+      <div class="pt-4">
         <.button
           type="submit"
-          phx-disable-with="Confirming..."
+          phx-disable-with="Processing..."
           hidden={@presale_form[:is_confirmed?]}
-          disabled={
-            @presale_form[:eth_amount] == 0.0 or
-              @presale_form[:eth_address] |> String.trim() == ""
-          }
-          class="bg-teal-400 hover:bg-teal-500 text-gray-900 font-bold py-2 px-6 rounded-lg disabled:opacity-50 transition duration-300 ease-in-out transform hover:scale-105 disabled:cursor-not-allowed w-full"
+          disabled={@presale_form[:amount] == 0.0 or @presale_form[:wallet_address] in [nil, ""]}
+          class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Confirm Purchase
         </.button>
-      </:actions>
-    </.simple_form>
+      </div>
+    </.form>
     """
   end
 
@@ -249,13 +361,13 @@ defmodule BirdpawWeb.Components.Promo do
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
-          ETH Address
+          Order State
         </p>
         <p class="text-sm sm:text-base font-semibold text-white truncate">
-          <%= @order.eth_address %>
+          <%= @order.order_state %>
         </p>
       </div>
-
+      <!-- Additional fields... -->
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
           Amount of $BIRDPAW
@@ -265,14 +377,14 @@ defmodule BirdpawWeb.Components.Promo do
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
-          Amount of ETH
+          Amount of <%= @order.payment_method %>
         </p>
-        <p class="text-sm sm:text-base font-semibold text-white"><%= @order.eth_amount %></p>
+        <p class="text-sm sm:text-base font-semibold text-white"><%= @order.amount %></p>
       </div>
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-6">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">Timestamp</p>
-        <p class="text-sm sm:text-base font-semibold text-white"><%= @order.timestamp <> " UTC" %></p>
+        <p class="text-sm sm:text-base font-semibold text-white"><%= @order.timestamp %></p>
       </div>
 
       <img
@@ -284,4 +396,6 @@ defmodule BirdpawWeb.Components.Promo do
     </div>
     """
   end
+
+  defp get_currency_options, do: @currencies
 end

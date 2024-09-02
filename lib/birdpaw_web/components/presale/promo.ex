@@ -23,47 +23,28 @@ defmodule BirdpawWeb.Components.Promo do
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
     # Fetch all previous orders for this address
-    previous_orders = get_orders_by_wallet_address(wallet_address)
-    IO.inspect(previous_orders)
+    order_uuid = Ecto.UUID.generate() |> Base.encode16(case: :lower)
 
-    # Check if the user has made more than 10 orders
-    if length(previous_orders) >= 1000 do
-      # Return an error if the user has more than 10 orders
-      {:noreply,
-       socket
-       |> put_flash(:error, "You have reached the maximum number of orders.")
-       |> assign(presale_form: presale_form)}
-    else
-      # Check if the new order's payment_method and amount match any previous order
-      matching_order =
-        Enum.find(previous_orders, fn order ->
-          order.payment_method == payment_method && order.amount == amount
-        end)
+    order = %{
+      wallet_address: wallet_address,
+      birdpaw_amount: birdpaw_amount,
+      payment_method: payment_method,
+      amount: amount,
+      is_confirmed?: true,
+      timestamp: DateTime.utc_now(),
+      uuid: order_uuid,
+      order_state: "confirmed",
+      qr_code_base64: presale_form[:qr_code_base64]
+    }
 
-      order_uuid = Ecto.UUID.generate() |> Base.encode16(case: :lower)
+    {:ok, created_order} = create_presale_order(order)
 
-      order = %{
-        wallet_address: wallet_address,
-        birdpaw_amount: birdpaw_amount,
-        payment_method: payment_method,
-        amount: amount,
-        is_confirmed?: true,
-        timestamp: DateTime.utc_now(),
-        uuid: order_uuid,
-        order_state: "confirmed",
-        qr_code_base64: presale_form[:qr_code_base64]
-      }
+    IO.inspect(created_order, label: "order")
 
-      # Insert the new order into the database
-      {:ok, created_order} = create_presale_order(order)
-
-      IO.inspect(created_order, label: "order")
-
-      {:noreply,
-       socket
-       |> put_flash(:success, "Order confirmed successfully!")
-       |> assign(order: order, presale_form: Map.merge(presale_form, order))}
-    end
+    {:noreply,
+     socket
+     |> put_flash(:success, "Order confirmed successfully!")
+     |> assign(order: order, presale_form: Map.merge(presale_form, order))}
   end
 
   def handle_event(

@@ -31,7 +31,7 @@ defmodule BirdpawWeb.Components.Promo do
     IO.inspect(previous_orders)
 
     # Check if the user has made more than 10 orders
-    if length(previous_orders) >= 10 do
+    if length(previous_orders) >= 1000 do
       # Return an error if the user has more than 10 orders
       {:noreply,
        socket
@@ -65,7 +65,8 @@ defmodule BirdpawWeb.Components.Promo do
           is_confirmed?: true,
           timestamp: DateTime.utc_now(),
           uuid: order_uuid,
-          order_state: "confirmed"
+          order_state: "confirmed",
+          qr_code_base64: presale_form[:qr_code_base64]
         }
 
         # Insert the new order into the database
@@ -150,14 +151,14 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp generate_qr_code(wei_amount, eth_address) do
     payment_uri = "ethereum:#{eth_address}?value=#{wei_amount}"
-    png_settings = %QRCode.Render.PngSettings{qrcode_color: {17, 170, 136}}
+    png_settings = %QRCode.Render.PngSettings{qrcode_color: {17, 170, 136}, scale: 5}
 
     # Generate the QR code
     {:ok, qr_code_binary} =
       payment_uri
-      |> QRCode.create()
+      |> QRCode.create(:high)
       |> QRCode.render(:png, png_settings)
-      |> QRCode.save("priv/payments/qr_code_#{eth_address}.png")
+      |> QRCode.to_base64()
 
     qr_code_binary
   end
@@ -166,8 +167,7 @@ defmodule BirdpawWeb.Components.Promo do
   def render(assigns) do
     ~H"""
     <div id="promo-section" class="text-white py-8 sm:py-12 md:py-20 bg-gray-900">
-      <.header_section />
-      <.token_info_section />
+      <.header_section /> <.token_info_section />
       <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
       <%= if @toggle_buy_token do %>
         <.modal myself={@myself}>
@@ -188,6 +188,7 @@ defmodule BirdpawWeb.Components.Promo do
       <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-teal-400 mb-4">
         🎉 Welcome to the $BIRDPAW Presale! 🎉
       </h1>
+
       <p class="text-base sm:text-lg md:text-xl font-light text-gray-300">
         Join the adventure and hunt for treasures in the crypto jungle!
       </p>
@@ -209,11 +210,13 @@ defmodule BirdpawWeb.Components.Promo do
     ~H"""
     <div class="p-6 sm:p-8 bg-gradient-to-tr from-teal-500 to-blue-500 rounded-lg shadow-lg text-center transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
       <p class="text-lg sm:text-xl font-semibold text-white"><%= @title %></p>
+
       <%= if @progress do %>
         <div class="w-full h-3 sm:h-4 bg-gray-700 rounded-full mt-3 sm:mt-4">
           <div class="h-3 sm:h-4 bg-teal-400 rounded-full" style="width: 50%;"></div>
         </div>
       <% end %>
+
       <p class="text-2xl sm:text-3xl font-bold text-white mt-2"><%= @value %></p>
     </div>
     """
@@ -310,6 +313,7 @@ defmodule BirdpawWeb.Components.Promo do
           >
             ETH
           </div>
+
           <div
             id="payment_method-usdt"
             phx-click="select-payment_method"
@@ -320,6 +324,7 @@ defmodule BirdpawWeb.Components.Promo do
             USDT
           </div>
         </div>
+
         <input
           type="hidden"
           name="payment_method"
@@ -362,6 +367,7 @@ defmodule BirdpawWeb.Components.Promo do
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">Order ID</p>
+
         <p class="text-sm sm:text-base font-semibold text-white truncate"><%= @order.uuid %></p>
       </div>
 
@@ -369,6 +375,7 @@ defmodule BirdpawWeb.Components.Promo do
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
           Order State
         </p>
+
         <p class="text-sm sm:text-base font-semibold text-white truncate">
           <%= @order.order_state %>
         </p>
@@ -378,6 +385,7 @@ defmodule BirdpawWeb.Components.Promo do
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
           Amount of $BIRDPAW
         </p>
+
         <p class="text-sm sm:text-base font-semibold text-white"><%= @order.birdpaw_amount %></p>
       </div>
 
@@ -385,16 +393,18 @@ defmodule BirdpawWeb.Components.Promo do
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">
           Amount of <%= @order.payment_method %>
         </p>
+
         <p class="text-sm sm:text-base font-semibold text-white"><%= @order.amount %></p>
       </div>
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-6">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">Timestamp</p>
+
         <p class="text-sm sm:text-base font-semibold text-white"><%= @order.timestamp %></p>
       </div>
 
       <img
-        src={~p"/payments/qr_code_0xDc484b655b157387B493DFBeDbeC4d44A248566F.png"}
+        src={"data:image/png; base64, #{@order.qr_code_base64}"}
         alt="QR code"
         class="mx-auto mt-6 rounded-lg shadow-lg"
       />

@@ -11,6 +11,9 @@ defmodule BirdpawWeb.Components.Promo do
   alias Birdpaw.PresaleUtil, as: PresaleUtil
   alias BirdpawWeb.Components.{OrderForm, OrderInfo}
 
+  @eth_cost "0.00000016667 ETH"
+  @ppresale_amount "150M $BIRDPAW"
+
   @impl true
   def handle_event(
         "confirm-buy-token",
@@ -156,8 +159,8 @@ defmodule BirdpawWeb.Components.Promo do
   defp token_info_section(assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
-      <.info_card title="Total Presale Tokens" value="150M $BIRDPAW" progress={false} />
-      <.info_card title="Price Per Token" value="0.00000033 ETH" progress={false} />
+      <.info_card title="Total Presale Tokens" value={get_presale_amount()} progress={false} />
+      <.info_card title="Price Per Token" value={get_cost_in_eth()} progress={false} />
       <.info_card title="Progress" value="50% Sold" progress={true} />
     </div>
     """
@@ -215,4 +218,8 @@ defmodule BirdpawWeb.Components.Promo do
     </div>
     """
   end
+
+  defp get_presale_amount, do: @presale_amount
+
+  defp get_cost_in_eth, do: @eth_cost
 end

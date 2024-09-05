@@ -4,8 +4,8 @@ defmodule Birdpaw.PresaleUtil do
   """
 
   @eth_conversion_rate 6_000_000
-
   @usdt_conversion_rate 0.00042
+  @usdt_decimal_factor :math.pow(10, 6) |> round()
 
   def generate_qr_code({wei_amount, amount}, wallet_address, payment_method) do
     payment_uri =
@@ -14,8 +14,9 @@ defmodule Birdpaw.PresaleUtil do
           "ethereum:#{wallet_address}?value=#{wei_amount}"
 
         "USDT" ->
-          # Correctly formatted ERC20 transfer call for USDT (amount in normal units, not wei)
-          "ethereum:0xdAC17F958D2ee523a2206206994597C13D831ec7/transfer?address=#{wallet_address}&token=#{amount}"
+          usdt_amount_in_smallest_units = round(amount * @usdt_decimal_factor)
+
+          "ethereum:0xdAC17F958D2ee523a2206206994597C13D831ec7/transfer?address=#{wallet_address}&uint256=#{usdt_amount_in_smallest_units}"
 
         _ ->
           raise "Unsupported payment method"
@@ -23,7 +24,6 @@ defmodule Birdpaw.PresaleUtil do
 
     IO.inspect(payment_uri, label: "payment_uri")
 
-    # Generate the QR code as before
     png_settings = %QRCode.Render.PngSettings{qrcode_color: {17, 170, 136}, scale: 5}
 
     {:ok, qr_code_binary} =

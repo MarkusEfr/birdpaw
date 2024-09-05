@@ -12,7 +12,7 @@ defmodule BirdpawWeb.Components.Promo do
   alias BirdpawWeb.Components.{OrderForm, OrderInfo}
 
   @eth_cost "0.00000016667 ETH"
-  @ppresale_amount "150M $BIRDPAW"
+  @presale_amount "150M $BIRDPAW"
 
   @impl true
   def handle_event(

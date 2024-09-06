@@ -148,7 +148,7 @@ defmodule BirdpawWeb.Components.Promo do
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-teal-300 tracking-tight mb-4">
         🔥 The BIRDPAW Token Presale is Open! 🔥
       </h1>
-      
+
       <p class="text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed max-w-xl mx-auto px-4">
         Seize the opportunity to join an exclusive community. $BIRDPAW is here to disrupt the crypto space with innovation and purpose. Get in early and secure your place in the future of decentralized finance.
       </p>
@@ -170,14 +170,14 @@ defmodule BirdpawWeb.Components.Promo do
     ~H"""
     <div class="p-4 sm:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-xl shadow-lg text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
       <p class="text-base sm:text-lg font-medium text-gray-300 mb-2"><%= @title %></p>
-      
+
       <%= if @progress do %>
         <div class="w-full h-2 bg-gray-600 rounded-full mt-2">
           <div class="h-2 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full" style="width: 50%;">
           </div>
         </div>
       <% end %>
-      
+
       <p class="text-xl sm:text-2xl font-semibold text-white mt-3"><%= @value %></p>
     </div>
     """
@@ -203,9 +203,9 @@ defmodule BirdpawWeb.Components.Promo do
     ~H"""
     <div
       id="buy-modal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300 ease-out"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300 ease-out sm:p-4"
     >
-      <div class="bg-gray-900 text-white rounded-lg p-5 sm:p-6 w-full max-w-sm sm:max-w-md mx-4 shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
+      <div class="bg-gray-900 text-white rounded-lg p-5 sm:p-6 w-full h-full max-w-sm sm:max-w-md mx-4 sm:mx-auto sm:max-h-full sm:h-auto shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
         <button
           phx-click="toggle-buy-token"
           phx-value-toggle="false"
@@ -214,7 +214,9 @@ defmodule BirdpawWeb.Components.Promo do
         >
           ✖
         </button>
-         <%= render_slot(@inner_block) %>
+        <div class="h-full overflow-y-auto">
+          <%= render_slot(@inner_block) %>
+        </div>
       </div>
     </div>
     """

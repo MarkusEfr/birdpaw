@@ -121,9 +121,8 @@ defmodule BirdpawWeb.Components.Promo do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="promo-section" class="text-white py-6 sm:py-10 lg:py-16 bg-gray-900">
-      <.header_section />
-      <.token_info_section />
+    <div id="promo-section" class="text-white py-6 sm:py-8 md:py-10 bg-gray-900">
+      <.header_section /> <.token_info_section />
       <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
       <%= if @toggle_buy_token do %>
         <.modal myself={@myself}>
@@ -145,13 +144,13 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp header_section(assigns) do
     ~H"""
-    <div id="promo-header" class="text-center mb-8 sm:mb-10">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-teal-300 tracking-tight mb-4 sm:mb-5">
-        🚀 Exclusive $BIRDPAW Presale is Live! 🚀
+    <div id="promo-header" class="text-center mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-teal-300 tracking-tight mb-4">
+        🔥 The BIRDPAW Token Presale is Open! 🔥
       </h1>
-
-      <p class="text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed max-w-2xl mx-auto">
-        Join the revolution in the crypto jungle. Secure your tokens now and become part of the Birdpaw movement.
+      
+      <p class="text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed max-w-xl mx-auto px-4">
+        Seize the opportunity to join an exclusive community. $BIRDPAW is here to disrupt the crypto space with innovation and purpose. Get in early and secure your place in the future of decentralized finance.
       </p>
     </div>
     """
@@ -159,30 +158,27 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp token_info_section(assigns) do
     ~H"""
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
       <.info_card title="Total Presale Tokens" value={get_presale_amount()} progress={false} />
       <.info_card title="Price Per Token" value={get_cost_in_eth()} progress={false} />
-      <.info_card title="Progress" value="50% Sold" progress={true} />
+      <.info_card title="Presale Progress" value="50% Sold" progress={true} />
     </div>
     """
   end
 
   defp info_card(assigns) do
     ~H"""
-    <div class="p-6 sm:p-8 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-2xl shadow-xl text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
-      <p class="text-lg sm:text-xl font-medium text-gray-200 mb-2"><%= @title %></p>
-
+    <div class="p-4 sm:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-xl shadow-lg text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+      <p class="text-base sm:text-lg font-medium text-gray-300 mb-2"><%= @title %></p>
+      
       <%= if @progress do %>
-        <div class="w-full h-2 sm:h-3 bg-gray-600 rounded-full mt-3 sm:mt-4">
-          <div
-            class="h-2 sm:h-3 bg-gradient-to-r from-indigo-400 via-purple-500 to-teal-500 rounded-full"
-            style="width: 50%;"
-          >
+        <div class="w-full h-2 bg-gray-600 rounded-full mt-2">
+          <div class="h-2 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full" style="width: 50%;">
           </div>
         </div>
       <% end %>
-
-      <p class="text-2xl sm:text-3xl font-semibold text-white mt-3 sm:mt-4"><%= @value %></p>
+      
+      <p class="text-xl sm:text-2xl font-semibold text-white mt-3"><%= @value %></p>
     </div>
     """
   end
@@ -194,10 +190,10 @@ defmodule BirdpawWeb.Components.Promo do
       phx-click="toggle-buy-token"
       phx-value-toggle="true"
       phx-target={@myself}
-      class="text-center mt-8 sm:mt-10"
+      class="text-center mt-6 sm:mt-8"
     >
-      <button class="bg-gradient-to-r from-teal-400 to-yellow-500 hover:from-teal-500 hover:to-yellow-600 text-gray-900 font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
-        🐾 Purchase Your $BIRDPAW Tokens Now
+      <button class="bg-gradient-to-r from-teal-500 via-blue-500 to-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 sm:py-3 sm:px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
+        💼 Reserve Your $BIRDPAW Tokens Now
       </button>
     </div>
     """
@@ -209,7 +205,7 @@ defmodule BirdpawWeb.Components.Promo do
       id="buy-modal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300 ease-out"
     >
-      <div class="bg-gray-900 text-white rounded-lg p-6 sm:p-8 w-full max-w-md sm:max-w-lg mx-4 shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
+      <div class="bg-gray-900 text-white rounded-lg p-5 sm:p-6 w-full max-w-sm sm:max-w-md mx-4 shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
         <button
           phx-click="toggle-buy-token"
           phx-value-toggle="false"
@@ -218,7 +214,7 @@ defmodule BirdpawWeb.Components.Promo do
         >
           ✖
         </button>
-        <%= render_slot(@inner_block) %>
+         <%= render_slot(@inner_block) %>
       </div>
     </div>
     """

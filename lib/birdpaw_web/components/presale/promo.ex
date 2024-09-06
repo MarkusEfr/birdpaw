@@ -26,7 +26,7 @@ defmodule BirdpawWeb.Components.Promo do
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
     # Fetch all previous orders for this address
-    order_uuid = Ecto.UUID.generate() |> Base.encode16(case: :lower)
+    order_uuid = Ecto.UUID.generate()
 
     order = %{
       wallet_address: wallet_address,

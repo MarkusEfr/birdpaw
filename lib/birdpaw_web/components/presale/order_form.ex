@@ -103,7 +103,10 @@ defmodule BirdpawWeb.Components.OrderForm do
             type="submit"
             phx-disable-with="Processing..."
             hidden={@presale_form[:is_confirmed?]}
-            disabled={@presale_form[:amount] == 0.0 or @presale_form[:wallet_address] in [nil, ""]}
+            disabled={
+              @presale_form[:amount] == 0.0 or
+                (@presale_form[:wallet_address] |> String.trim()) in [nil, ""]
+            }
             class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Confirm Purchase

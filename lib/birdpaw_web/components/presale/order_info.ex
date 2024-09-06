@@ -9,13 +9,13 @@ defmodule BirdpawWeb.Components.OrderInfo do
 
   def render(assigns) do
     ~H"""
-    <div class="text-center bg-gray-900 rounded-lg p-6 sm:p-8 shadow-lg">
+    <div class="text-center bg-gray-900 rounded-lg p-6 sm:p-4 shadow-lg">
       <p class="text-xl sm:text-2xl font-bold text-teal-400 mb-6">Order Confirmed!</p>
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
         <p class="text-xs sm:text-sm font-medium text-teal-400 uppercase tracking-wide">Order ID</p>
 
-        <p class="text-sm sm:text-base font-semibold text-white truncate"><%= @order.uuid %></p>
+        <p class="text-sm sm:text-base text-white truncate"><%= @order.uuid %></p>
       </div>
 
       <div class="bg-gray-800 rounded-lg p-4 shadow-md mb-4">
@@ -50,7 +50,7 @@ defmodule BirdpawWeb.Components.OrderInfo do
         <p class="text-sm sm:text-base font-semibold text-white"><%= @order.timestamp %></p>
       </div>
 
-      <img src={"data:image/png; base64, #{@order.qr_code_base64}"} alt="QR code" class="shadow-lg" />
+      <img src={"data:image/png; base64, #{@order.qr_code_base64}"} alt="QR code" class="shadow-lg mx-auto" />
       <p class="text-xs sm:text-sm text-gray-400 mt-4">Scan the QR code to make the payment.</p>
     </div>
     """

@@ -5,7 +5,7 @@ defmodule Birdpaw.Presale.PresaleOrder do
   schema "presale_orders" do
     field :timestamp, :utc_datetime
     field :uuid, :string
-    field :wallet_address, :string
+    field :wallet_address, :string, default: "N/A"
     field :birdpaw_amount, :integer
     field :amount, :decimal
     field :payment_method, :string

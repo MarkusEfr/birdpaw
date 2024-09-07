@@ -6,7 +6,7 @@ defmodule BirdpawWeb.Components.Promo do
   for payment.
   """
   use BirdpawWeb, :live_component
-  import BirdpawWeb.CoreComponents, only: [input: 1, button: 1]
+  import BirdpawWeb.CoreComponents, only: [button: 1]
   import Birdpaw.Presale
   alias Birdpaw.PresaleUtil, as: PresaleUtil
   alias BirdpawWeb.Components.{OrderForm, OrderInfo}
@@ -99,7 +99,6 @@ defmodule BirdpawWeb.Components.Promo do
     # Generate the QR code data based on the selected payment_method, amount, and address
     qr_code_binary =
       case {wallet_address, wei_amount} do
-        {"", _} -> nil
         {_, ""} -> nil
         _ -> PresaleUtil.generate_qr_code({wei_amount, amount}, wallet_address, payment_method)
       end
@@ -127,7 +126,7 @@ defmodule BirdpawWeb.Components.Promo do
       <%= if @toggle_buy_token do %>
         <.modal myself={@myself}>
           <%= if @presale_form.is_confirmed? do %>
-            <.live_component id="order-info" module={OrderInfo} order={@order} />
+            <.live_component id="order-info" module={OrderInfo} order={@order} info_visible={false} />
           <% else %>
             <.live_component
               id="order-form"
@@ -185,16 +184,31 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp call_to_action(assigns) do
     ~H"""
+    <!-- Container with background image and overlay -->
     <div
       id="payment-container"
       phx-click="toggle-buy-token"
       phx-value-toggle="true"
       phx-target={@myself}
-      class="text-center mt-6 sm:mt-8"
+      class="relative text-center mt-6 sm:mt-8 rounded-lg overflow-hidden max-w-full"
+      style="background-image: url('/images/promo-btn.webp'); background-size: cover; background-position: center;"
     >
-      <button class="bg-gradient-to-r from-teal-500 via-blue-500 to-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 sm:py-3 sm:px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
-        💼 Reserve Your $BIRDPAW Tokens Now
-      </button>
+      <!-- Dark overlay for contrast -->
+      <div class="absolute inset-0 bg-gray-900 bg-opacity-75"></div>
+      <!-- Button Content -->
+      <div class="relative z-10 py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
+        <!-- Main Button -->
+        <button class="bg-gradient-to-r from-purple-500 via-indigo-600 to-teal-500 hover:from-indigo-600 hover:via-purple-700 hover:to-teal-700
+          text-white font-bold py-3 px-6 sm:py-4 sm:px-8 lg:py-5 lg:px-10
+          rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105
+          w-full sm:w-auto tracking-wide text-base sm:text-lg lg:text-xl xl:text-2xl
+          max-w-xs sm:max-w-md lg:max-w-lg mx-auto">
+          ✨ Exclusive Access to $BIRDPAW - Don't Miss Out!
+        </button>
+      </div>
+      <!-- Decorative border at the bottom -->
+      <div class="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-500">
+      </div>
     </div>
     """
   end

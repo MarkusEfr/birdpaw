@@ -8,7 +8,7 @@ defmodule Birdpaw.PresaleUtil do
   @usdt_decimal_factor :math.pow(10, 6) |> round()
   @owner_wallet "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
 
-  def generate_qr_code({wei_amount, amount}, wallet_address, payment_method) do
+  def generate_qr_code({wei_amount, amount}, _wallet_address, payment_method) do
     payment_uri =
       case payment_method do
         "ETH" ->

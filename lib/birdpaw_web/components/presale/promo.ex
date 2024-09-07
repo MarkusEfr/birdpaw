@@ -143,14 +143,33 @@ defmodule BirdpawWeb.Components.Promo do
 
   defp header_section(assigns) do
     ~H"""
-    <div id="promo-header" class="text-center mb-6 sm:mb-8">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-teal-300 tracking-tight mb-4">
-        🔥 The BIRDPAW Token Presale is Open! 🔥
+    <div id="promo-header" class="text-center mb-8">
+      <!-- Title with gradient and text shadow -->
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 shadow-lg">
+        Invest in the Future of Fun & Profit with $BIRDPAW
       </h1>
-
-      <p class="text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed max-w-xl mx-auto px-4">
-        Seize the opportunity to join an exclusive community. $BIRDPAW is here to disrupt the crypto space with innovation and purpose. Get in early and secure your place in the future of decentralized finance.
-      </p>
+      <!-- Subheading with smart, concise messaging -->
+      <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-200 mb-6 leading-relaxed max-w-2xl mx-auto">
+        Join a token built on community, innovation, and a playful spirit. $BIRDPAW is your gateway to decentralized finance, where every token holds a promise of growth.
+      </h2>
+      <!-- Larger Coin-like Icons with consistent tone -->
+      <div class="flex justify-center items-center space-x-6 mt-6">
+        <img
+          src="/images/cat-rocket.webp"
+          alt="Cat Rocket"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-teal-500"
+        />
+        <img
+          src="/images/birdpaw-coin.webp"
+          alt="BirdPaw Coin"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-purple-500"
+        />
+        <img
+          src="/images/cat-hunting-bird.webp"
+          alt="Cat Hunting Bird"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-indigo-500"
+        />
+      </div>
     </div>
     """
   end

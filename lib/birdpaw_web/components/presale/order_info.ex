@@ -12,25 +12,26 @@ defmodule BirdpawWeb.Components.OrderInfo do
     ~H"""
     <div
       id="order-info"
-      class="bg-gray-900 text-center rounded-xl p-6 sm:p-8 lg:p-10 shadow-lg max-w-md sm:max-w-lg lg:max-w-2xl mx-auto transition-all duration-300"
+      class="bg-gray-900 text-center rounded-xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-md sm:max-w-lg lg:max-w-2xl mx-auto transition-all duration-300"
     >
       <!-- Title -->
-      <p class="text-2xl sm:text-3xl font-semibold text-teal-300 mb-6 tracking-wide uppercase">
+      <p class="text-lg sm:text-xl lg:text-2xl font-semibold text-teal-300 mb-4 tracking-wide uppercase">
         Order Summary
       </p>
-      <div class="bg-gray-800 p-4 rounded-md text-teal-300 space-y-2 shadow-sm flex items-start">
+      <!-- Notice -->
+      <div class="bg-gray-800 p-3 rounded-md text-teal-300 space-y-2 shadow-sm flex items-start mb-3">
         <div class="text-left">
-          <p class="text-sm lg:text-base font-medium">
+          <p class="text-xs lg:text-sm font-medium leading-tight">
             Your $BIRDPAW tokens will be credited to your wallet within 24 hours after payment is confirmed.
           </p>
         </div>
       </div>
       <!-- Toggle Details Button -->
-      <div class="mb-4 mt-4">
+      <div class="mb-3">
         <button
           phx-click="toggle-details"
           phx-target={@myself}
-          class="text-teal-400 hover:text-teal-500 font-medium transition-all hover:underline"
+          class="text-teal-400 hover:text-teal-500 font-medium text-sm transition-all hover:underline"
         >
           <%= if @info_visible do %>
             Hide Order Details
@@ -39,55 +40,71 @@ defmodule BirdpawWeb.Components.OrderInfo do
           <% end %>
         </button>
       </div>
-      <!-- Collapsible Order Information -->
+      <!-- Collapsible Order Information with Compact Styling -->
       <%= if @info_visible do %>
-        <div class="space-y-4 text-left text-gray-300 transition-opacity duration-300">
+        <div class="space-y-2 sm:space-y-3 text-left text-gray-300 transition-opacity duration-300">
           <!-- Order ID -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
+          <div
+            class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-1 sm:py-2 hover:bg-gray-800 hover:shadow-md rounded-md w-full"
+            phx-click="select-field"
+            phx-value-field="order_id"
+            phx-target={@myself}
+          >
             <p class="text-teal-300 font-medium">Order ID</p>
-            <p class="text-white font-bold"><%= @order.uuid %></p>
-          </div>
-          <!-- Wallet Address -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
-            <p class="text-teal-300 font-medium">Wallet Address</p>
-            <p class="text-white font-bold">
-              <%= if @order.wallet_address == "", do: "N/A", else: @order.wallet_address %>
+            <p class="text-white font-bold w-full break-all truncate overflow-wrap overflow-x-auto hover:whitespace-normal break-all">
+              <%= if assigns[:selected_field] == :order_id,
+                do: @order.uuid,
+                else: String.slice(@order.uuid, 0..12) <> "..." %>
             </p>
           </div>
-          <!-- Order State -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
+          <!-- Wallet Address -->
+          <div
+            class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-1 sm:py-2 hover:bg-gray-800 hover:shadow-md rounded-md w-full"
+            phx-click="select-field"
+            phx-value-field="wallet_address"
+            phx-target={@myself}
+          >
+            <p class="text-teal-300 font-medium">Wallet Address</p>
+            <p class="text-white font-bold w-full break-all truncate overflow-wrap overflow-x-auto hover:whitespace-normal break-all">
+              <%= if assigns[:selected_field] == :wallet_address,
+                do: @order.wallet_address,
+                else: String.slice(@order.wallet_address, 0..12) <> "..." %>
+            </p>
+          </div>
+          <!-- Other Fields (Order State, Amount of BIRDPAW, etc.) -->
+          <div class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
             <p class="text-teal-300 font-medium">Order State</p>
             <p class="text-white font-semibold"><%= @order.order_state %></p>
           </div>
-          <!-- Amount of BIRDPAW -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
+
+          <div class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
             <p class="text-teal-300 font-medium">Amount of $BIRDPAW</p>
             <p class="text-white font-semibold"><%= @order.birdpaw_amount %></p>
           </div>
-          <!-- Amount of Payment -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
+
+          <div class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
             <p class="text-teal-300 font-medium">Amount of <%= @order.payment_method %></p>
             <p class="text-white font-semibold"><%= @order.amount %></p>
           </div>
-          <!-- Timestamp -->
-          <div class="flex justify-between items-center text-sm sm:text-base space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
+
+          <div class="flex justify-between items-center text-xs sm:text-sm space-x-2 py-2 hover:bg-gray-800 hover:shadow-md rounded-md">
             <p class="text-teal-300 font-medium">Timestamp</p>
             <p class="text-white font-semibold"><%= @order.timestamp %></p>
           </div>
         </div>
       <% end %>
       <!-- QR Code with Focus Box -->
-      <div class="mt-6 flex justify-center">
-        <div class="p-4 bg-gray-800 rounded-lg hover:shadow-2xl transition-all duration-300">
+      <div class="mt-4 sm:mt-5 flex justify-center">
+        <div class="p-3 bg-gray-800 rounded-lg hover:shadow-2xl transition-all duration-300">
           <img
             src={"data:image/png;base64,#{@order.qr_code_base64}"}
             alt="QR code"
-            class="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-md ring-1 ring-teal-400"
+            class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-md ring-1 ring-teal-400"
           />
         </div>
       </div>
 
-      <p class="text-xs sm:text-sm lg:text-base text-gray-400 mt-3">
+      <p class="text-xs sm:text-sm text-gray-400 mt-2 sm:mt-3">
         Scan the QR code to make the payment.
       </p>
     </div>
@@ -97,5 +114,10 @@ defmodule BirdpawWeb.Components.OrderInfo do
   @impl true
   def handle_event("toggle-details", _params, socket) do
     {:noreply, assign(socket, :info_visible, !socket.assigns.info_visible)}
+  end
+
+  @impl true
+  def handle_event("select-field", %{"field" => field}, socket) do
+    {:noreply, assign(socket, :selected_field, String.to_atom(field))}
   end
 end

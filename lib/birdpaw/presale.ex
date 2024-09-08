@@ -8,6 +8,43 @@ defmodule Birdpaw.Presale do
   alias Birdpaw.PresaleOrder
 
   @doc """
+  Filters presale orders by given parameters.
+
+  ## Examples
+
+      iex> get_orders_by_params(%{wallet_address: "0x123...", uuid: "1234-5678-91011"})
+      [%PresaleOrder{}, ...]
+
+      iex> get_orders_by_params(%{order_state: "confirmed"})
+      [%PresaleOrder{}, ...]
+
+  """
+  def get_orders_by_params(params \\ %{}) do
+    query = from o in PresaleOrder, where: ^build_conditions(params)
+    Repo.all(query)
+  end
+
+  defp build_conditions(params) do
+    Enum.reduce(params, dynamic(true), fn
+      {:wallet_address, wallet_address}, dynamic ->
+        dynamic([o], ^dynamic and o.wallet_address == ^wallet_address)
+
+      {:uuid, uuid}, dynamic ->
+        dynamic([o], ^dynamic and o.uuid == ^uuid)
+
+      {:order_state, order_state}, dynamic ->
+        dynamic([o], ^dynamic and o.order_state == ^order_state)
+
+      {:amount, amount}, dynamic ->
+        dynamic([o], ^dynamic and o.amount == ^amount)
+
+      # Add other conditions here for other fields you want to filter by
+      _, dynamic ->
+        dynamic
+    end)
+  end
+
+  @doc """
   Returns the list of presale_orders.
 
   ## Examples

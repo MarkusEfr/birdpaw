@@ -38,6 +38,11 @@ defmodule BirdpawWeb.Page.Index do
          qr_code_base64: nil,
          is_confirmed?: false,
          payment_method: "ETH"
+       },
+       orders_data: %{
+         orders: [],
+         page: 1,
+         total_pages: 0
        }
      )}
   end
@@ -123,7 +128,7 @@ defmodule BirdpawWeb.Page.Index do
           toggle_buy_token={@toggle_buy_token}
           presale_form={@presale_form}
           modal_image={nil}
-          orders={[]}
+          orders_data={@orders_data}
           show_search_modal={false}
         />
         <div

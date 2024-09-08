@@ -8,6 +8,13 @@ defmodule Birdpaw.PresaleUtil do
   @usdt_decimal_factor :math.pow(10, 6) |> round()
   @owner_wallet "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
 
+  @page_size 10
+
+  def get_page_size, do: @page_size
+
+  def get_page_orders(orders, page) when page == 1, do: Enum.slice(orders, 0, @page_size)
+  def get_page_orders(orders, page), do: Enum.slice(orders, @page_size * (page - 1), @page_size)
+
   def generate_qr_code({wei_amount, amount}, _wallet_address, payment_method) do
     payment_uri =
       case payment_method do
@@ -50,5 +57,73 @@ defmodule Birdpaw.PresaleUtil do
 
   def calculate_amount(_birdpaw_amount, _payment_method) do
     0
+  end
+
+  def fetch_orders(search_query) do
+    search_params = build_search_params(search_query)
+
+    orders =
+      search_params
+      |> Birdpaw.Presale.get_orders_by_params()
+      |> Enum.map(fn order ->
+        %{
+          id: order.id,
+          uuid: order.uuid,
+          wallet_address: order.wallet_address,
+          birdpaw_amount: order.birdpaw_amount,
+          amount: order.amount,
+          timestamp: order.timestamp,
+          payment_method: order.payment_method,
+          order_state: order.order_state
+        }
+      end)
+      |> Enum.sort_by(fn order -> order.timestamp end, &>/2)
+
+    total_orders = Enum.count(orders) |> IO.inspect(label: "total_orders")
+
+    if total_orders > 0 do
+      %{
+        orders: orders,
+        selected: get_page_orders(orders, 1),
+        page: 1,
+        total_pages:
+          if(total_orders > @page_size, do: total_orders / @page_size, else: 1) |> ceil()
+      }
+    else
+      %{
+        orders: [],
+        selected: nil,
+        page: 1,
+        total_pages: 1
+      }
+    end
+    |> IO.inspect(label: "fetch_orders")
+  end
+
+  # Helper function to build search parameters based on search query
+  def build_search_params(search_query) do
+    cond do
+      is_uuid(search_query) ->
+        %{uuid: search_query}
+
+      is_erc20_wallet(search_query) ->
+        %{wallet_address: search_query}
+
+      true ->
+        # Return an empty map if no valid query
+        %{}
+    end
+  end
+
+  defp is_uuid(search_query) do
+    Regex.match?(
+      ~r/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+      search_query
+    )
+  end
+
+  # Helper function to detect if the input is an ERC20 wallet address
+  defp is_erc20_wallet(search_query) do
+    Regex.match?(~r/^0x[a-fA-F0-9]{40}$/, search_query)
   end
 end

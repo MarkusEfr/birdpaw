@@ -3,9 +3,9 @@ defmodule Birdpaw.PresaleOrder do
   import Ecto.Changeset
 
   schema "presale_orders" do
-    field :wallet_address, :string
+    field :wallet_address, :string, default: "N/A"
     field :birdpaw_amount, :integer
-    field :amount, :float
+    field :amount, :decimal
     field :order_state, :string, default: "pending"
     field :uuid, :string
     field :timestamp, :utc_datetime

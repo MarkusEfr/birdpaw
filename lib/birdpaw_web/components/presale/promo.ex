@@ -8,8 +8,8 @@ defmodule BirdpawWeb.Components.Promo do
   use BirdpawWeb, :live_component
   import BirdpawWeb.CoreComponents, only: [button: 1]
   import Birdpaw.Presale
-  alias Birdpaw.PresaleUtil, as: PresaleUtil
-  alias BirdpawWeb.Components.{OrderForm, OrderInfo}
+  import Birdpaw.PresaleUtil
+  alias BirdpawWeb.Components.{OrderForm, OrderInfo, ImageModal, SearchModal}
 
   @eth_cost "0.00000016667 ETH"
   @presale_amount "150M $BIRDPAW"
@@ -35,15 +35,15 @@ defmodule BirdpawWeb.Components.Promo do
       is_confirmed?: true,
       timestamp: DateTime.utc_now(),
       uuid: order_uuid,
-      order_state: "confirmed",
+      order_state: "pending",
       qr_code_base64: presale_form[:qr_code_base64]
     }
 
-    {:ok, created_order} = create_presale_order(order)
+    {:ok, _created_order} = create_presale_order(order)
 
     {:noreply,
      socket
-     |> put_flash(:success, "Order confirmed successfully!")
+     |> put_flash(:success, "Order created successfully!")
      |> assign(order: order, presale_form: Map.merge(presale_form, order))}
   end
 
@@ -53,7 +53,7 @@ defmodule BirdpawWeb.Components.Promo do
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
     birdpaw_amount = presale_form[:birdpaw_amount] || 0
-    amount = PresaleUtil.calculate_amount(birdpaw_amount, payment_method)
+    amount = calculate_amount(birdpaw_amount, payment_method)
     updated_presale_form = %{presale_form | payment_method: payment_method, amount: amount}
 
     IO.inspect(updated_presale_form, label: "updated_presale_form")
@@ -77,10 +77,10 @@ defmodule BirdpawWeb.Components.Promo do
     amount =
       case payment_method do
         "ETH" ->
-          PresaleUtil.calculate_amount(birdpaw_amount, "ETH")
+          calculate_amount(birdpaw_amount, "ETH")
 
         "USDT" ->
-          PresaleUtil.calculate_amount(birdpaw_amount, "USDT")
+          calculate_amount(birdpaw_amount, "USDT")
 
         _ ->
           0
@@ -92,7 +92,7 @@ defmodule BirdpawWeb.Components.Promo do
     qr_code_binary =
       case {wallet_address, wei_amount} do
         {_, ""} -> nil
-        _ -> PresaleUtil.generate_qr_code({wei_amount, amount}, wallet_address, payment_method)
+        _ -> generate_qr_code({wei_amount, amount}, wallet_address, payment_method)
       end
 
     presale_form = %{
@@ -124,9 +124,8 @@ defmodule BirdpawWeb.Components.Promo do
 
   @impl true
   def handle_event("search_orders", %{"search_query" => search_query}, socket) do
-    # Your logic to fetch orders by search query
-    orders = fetch_orders(search_query)
-    {:noreply, assign(socket, orders: orders)}
+    orders_data = fetch_orders(search_query)
+    {:noreply, assign(socket, orders_data: orders_data)}
   end
 
   @impl true
@@ -139,12 +138,52 @@ defmodule BirdpawWeb.Components.Promo do
     {:noreply, assign(socket, :show_search_modal, false)}
   end
 
-  defp fetch_orders(search_query) do
-    # Replace this with your actual search logic.
-    # Example: filtering orders by Order ID or Wallet Address.
-    []
+  @impl true
+  def handle_event(
+        "next_page",
+        _params,
+        %{
+          assigns: %{
+            orders_data: %{orders: orders, page: page, total_pages: total_pages} = orders_data
+          }
+        } = socket
+      ) do
+    if page < total_pages do
+      new_page = page + 1
+
+      {:noreply,
+       assign(socket,
+         orders_data: %{orders_data | page: new_page, selected: move_page(orders, new_page)}
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 
+  @impl true
+  def handle_event(
+        "previous_page",
+        _params,
+        %{assigns: %{orders_data: %{orders: orders, page: page} = orders_data}} = socket
+      ) do
+    if page > 1 do
+      new_page = page - 1
+
+      {:noreply,
+       assign(socket,
+         orders_data: %{orders_data | page: new_page, selected: move_page(orders, new_page)}
+       )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Function to fetch orders based on the current page
+  defp move_page(orders, page) do
+    get_page_orders(orders, page)
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div id="promo-section" class="text-white py-6 sm:py-8 md:py-10 bg-gray-900 relative">
@@ -152,150 +191,46 @@ defmodule BirdpawWeb.Components.Promo do
       <.header_section myself={@myself} />
       <.token_info_section />
       <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
-      <!-- Results Table (Hidden initially, shows after search) -->
-      <div id="order-search-trigger" class="mt-8 text-center">
-        <!-- Icon or Button to trigger search results with dark rare style -->
+      <div class="mt-8 text-center">
         <button
           phx-click="show-search-results"
           phx-target={@myself}
           class="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105 duration-300 ease-in-out"
         >
-          <span class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-teal-400 opacity-0 hover:opacity-30 rounded-full transition-opacity duration-300 ease-in-out">
-          </span>
           🔍 Search Orders
         </button>
-        <!-- Modal for search results -->
-        <%= if @show_search_modal do %>
-          <div
-            id="order-search-results-modal"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-95 transition-opacity duration-300 ease-out"
-          >
-            <div class="bg-gray-800 text-white rounded-lg p-5 sm:p-6 w-full max-w-2xl mx-4 sm:mx-auto shadow-2xl relative">
-              <!-- Close Button -->
-              <button
-                phx-click="close-search-results"
-                class="absolute top-3 right-3 text-gray-400 hover:text-gray-200 transition-colors duration-300"
-              >
-                ✖
-              </button>
-              <!-- Search Results Content -->
-              <div class="overflow-x-auto p-4 rounded-lg shadow-lg">
-                <%= if length(@orders) > 0 do %>
-                  <table class="min-w-full text-left text-sm sm:text-base rounded-md">
-                    <thead>
-                      <tr class="bg-gray-700">
-                        <th class="py-2 px-4 text-indigo-400 font-semibold">Order ID</th>
-                        <th class="py-2 px-4 text-indigo-400 font-semibold">Wallet Address</th>
-                        <th class="py-2 px-4 text-indigo-400 font-semibold">Amount</th>
-                        <th class="py-2 px-4 text-indigo-400 font-semibold">Order State</th>
-                        <th class="py-2 px-4 text-indigo-400 font-semibold"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <%= for order <- @orders do %>
-                        <tr class="bg-gray-800 hover:bg-gray-700 transition">
-                          <td class="py-2 px-4 truncate text-gray-200"><%= order.uuid %></td>
-                          <td class="py-2 px-4 truncate text-gray-200">
-                            <%= order.wallet_address %>
-                          </td>
-                          <td class="py-2 px-4 truncate text-gray-200">
-                            <%= order.amount %> $BIRDPAW
-                          </td>
-                          <td class="py-2 px-4 truncate text-gray-200"><%= order.order_state %></td>
-                          <td class="py-2 px-4">
-                            <button
-                              phx-click="view_order"
-                              phx-value-order_id={order.uuid}
-                              class="bg-indigo-500 hover:bg-indigo-600 text-white py-1 px-3 rounded-md transition-all duration-300"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-                <% else %>
-                  <p class="text-center text-gray-400 mt-6">No orders found.</p>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% end %>
       </div>
       <!-- Search Results Modal -->
-      <%= if @show_search_modal do %>
-        <div
-          id="search-modal"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80 transition-opacity duration-300 ease-out sm:p-4"
-        >
-          <div class="bg-gray-800 text-white rounded-lg p-5 sm:p-6 w-full h-full max-w-lg sm:max-w-2xl mx-auto sm:max-h-full sm:h-auto shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
-            <button
-              phx-click="close-search-results"
-              phx-target={@myself}
-              class="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
-            >
-              ✖
-            </button>
-            <!-- Results Table -->
-            <div id="order-search-results" class="mt-4">
-              <%= if length(@orders) > 0 do %>
-                <div class="overflow-x-auto bg-gray-700 p-4 rounded-lg shadow-lg">
-                  <table class="min-w-full text-left text-sm sm:text-base rounded-md">
-                    <thead>
-                      <tr class="bg-gray-600">
-                        <th class="py-2 px-4 text-teal-300 font-semibold">Order ID</th>
-                        <th class="py-2 px-4 text-teal-300 font-semibold">Wallet Address</th>
-                        <th class="py-2 px-4 text-teal-300 font-semibold">Amount</th>
-                        <th class="py-2 px-4 text-teal-300 font-semibold">Order State</th>
-                        <th class="py-2 px-4 text-teal-300 font-semibold"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <%= for order <- @orders do %>
-                        <tr class="bg-gray-700 hover:bg-gray-600 transition">
-                          <td class="py-2 px-4 truncate"><%= order.uuid %></td>
-                          <td class="py-2 px-4 truncate"><%= order.wallet_address %></td>
-                          <td class="py-2 px-4 truncate"><%= order.amount %> $BIRDPAW</td>
-                          <td class="py-2 px-4 truncate"><%= order.order_state %></td>
-                          <td class="py-2 px-4">
-                            <button
-                              phx-click="view_order"
-                              phx-value-order_id={order.uuid}
-                              class="bg-teal-500 hover:bg-teal-600 text-white py-1 px-3 rounded-md"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-                </div>
-              <% else %>
-                <p class="text-center text-gray-400 mt-6">No orders found.</p>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      <% end %>
+      <.live_component
+        :if={@show_search_modal}
+        id="search-modal"
+        module={SearchModal}
+        myself={@myself}
+        orders_data={@orders_data}
+        loading={false}
+        error_message={nil}
+      />
       <!-- Existing modal and promo components -->
       <%= if @toggle_buy_token do %>
-        <.modal myself={@myself}>
-          <%= if @presale_form.is_confirmed? do %>
-            <.live_component id="order-info" module={OrderInfo} order={@order} info_visible={false} />
-          <% else %>
-            <.live_component
-              id="order-form"
-              module={OrderForm}
-              presale_form={@presale_form}
-              myself={@myself}
-            />
-          <% end %>
-        </.modal>
+        <.buy_token_modal myself={@myself}>
+          <.live_component
+            :if={@presale_form.is_confirmed?}
+            id="order-info"
+            module={OrderInfo}
+            order={@order}
+            info_visible={false}
+          />
+          <.live_component
+            :if={!@presale_form.is_confirmed?}
+            id="order-form"
+            module={OrderForm}
+            presale_form={@presale_form}
+            myself={@myself}
+          />
+        </.buy_token_modal>
       <% end %>
       <%= if @modal_image do %>
-        <.image_modal myself={@myself} image={@modal_image} />
+        <.live_component id="image-modal" module={ImageModal} myself={@myself} image={@modal_image} />
       <% end %>
     </div>
     """
@@ -317,7 +252,7 @@ defmodule BirdpawWeb.Components.Promo do
         <img
           src="/images/cat-rocket.webp"
           alt="Cat Rocket"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
           phx-click="show-image-modal"
           phx-value-image="/images/cat-rocket.webp"
           phx-target={@myself}
@@ -325,7 +260,7 @@ defmodule BirdpawWeb.Components.Promo do
         <img
           src="/images/birdpaw-coin.webp"
           alt="BirdPaw Coin"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
           phx-click="show-image-modal"
           phx-value-image="/images/birdpaw-coin.webp"
           phx-target={@myself}
@@ -333,7 +268,7 @@ defmodule BirdpawWeb.Components.Promo do
         <img
           src="/images/cat-hunting-bird.webp"
           alt="Cat Hunting Bird"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
           phx-click="show-image-modal"
           phx-value-image="/images/cat-hunting-bird.webp"
           phx-target={@myself}
@@ -397,28 +332,7 @@ defmodule BirdpawWeb.Components.Promo do
     """
   end
 
-  defp image_modal(assigns) do
-    ~H"""
-    <div
-      id="image-modal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300 ease-out"
-    >
-      <div class="relative bg-white rounded-lg shadow-lg overflow-hidden max-w-full max-h-full p-4 sm:p-6">
-        <img src={@image} class="max-w-full max-h-full rounded-lg" alt="Full-size image" />
-        <!-- Close Button -->
-        <button
-          phx-click="close-modal"
-          phx-target={@myself}
-          class="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
-        >
-          ✖
-        </button>
-      </div>
-    </div>
-    """
-  end
-
-  defp modal(assigns) do
+  defp buy_token_modal(assigns) do
     ~H"""
     <div
       id="buy-modal"

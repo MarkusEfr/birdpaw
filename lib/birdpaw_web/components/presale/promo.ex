@@ -25,7 +25,6 @@ defmodule BirdpawWeb.Components.Promo do
         } = _params,
         %{assigns: %{presale_form: presale_form}} = socket
       ) do
-    # Fetch all previous orders for this address
     order_uuid = Ecto.UUID.generate()
 
     order = %{
@@ -41,8 +40,6 @@ defmodule BirdpawWeb.Components.Promo do
     }
 
     {:ok, created_order} = create_presale_order(order)
-
-    IO.inspect(created_order, label: "order")
 
     {:noreply,
      socket
@@ -61,11 +58,6 @@ defmodule BirdpawWeb.Components.Promo do
 
     IO.inspect(updated_presale_form, label: "updated_presale_form")
     {:noreply, assign(socket, presale_form: updated_presale_form)}
-  end
-
-  @impl true
-  def handle_event("toggle-buy-token", %{"toggle" => toggle}, socket) do
-    {:noreply, assign(socket, :toggle_buy_token, toggle == "true")}
   end
 
   @impl true
@@ -118,11 +110,26 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   @impl true
+  def handle_event("toggle-buy-token", %{"toggle" => toggle}, socket) do
+    {:noreply, assign(socket, :toggle_buy_token, toggle == "true")}
+  end
+
+  def handle_event("show-image-modal", %{"image" => image}, socket) do
+    {:noreply, assign(socket, :modal_image, image)}
+  end
+
+  def handle_event("close-modal", _params, socket) do
+    {:noreply, assign(socket, :modal_image, nil)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div id="promo-section" class="text-white py-6 sm:py-8 md:py-10 bg-gray-900">
-      <.header_section /> <.token_info_section />
+      <.header_section myself={@myself} />
+      <.token_info_section />
       <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
+
       <%= if @toggle_buy_token do %>
         <.modal myself={@myself}>
           <%= if @presale_form.is_confirmed? do %>
@@ -137,6 +144,10 @@ defmodule BirdpawWeb.Components.Promo do
           <% end %>
         </.modal>
       <% end %>
+      <!-- Modal for full-size images -->
+      <%= if @modal_image do %>
+        <.image_modal myself={@myself} image={@modal_image} />
+      <% end %>
     </div>
     """
   end
@@ -144,30 +155,37 @@ defmodule BirdpawWeb.Components.Promo do
   defp header_section(assigns) do
     ~H"""
     <div id="promo-header" class="text-center mb-8">
-      <!-- Title with a more subtle but solid style -->
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-200 tracking-wide">
         🚀 Ready to Launch into $BIRDPAW?
       </h1>
-      <!-- Intriguing and Fun Subheading -->
       <h2 class="text-base sm:text-lg md:text-xl font-medium text-gray-300 mb-6 leading-relaxed max-w-2xl mx-auto">
         Are you ready to catch your next opportunity? Join the $BIRDPAW revolution where agility meets the future of decentralized finance.
       </h2>
-      <!-- Images with smaller size and dark rings -->
+
       <div class="flex justify-center items-center space-x-6 mt-6">
         <img
           src="/images/cat-rocket.webp"
           alt="Cat Rocket"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          phx-click="show-image-modal"
+          phx-value-image="/images/cat-rocket.webp"
+          phx-target={@myself}
         />
         <img
           src="/images/birdpaw-coin.webp"
           alt="BirdPaw Coin"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          phx-click="show-image-modal"
+          phx-value-image="/images/birdpaw-coin.webp"
+          phx-target={@myself}
         />
         <img
           src="/images/cat-hunting-bird.webp"
           alt="Cat Hunting Bird"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          phx-click="show-image-modal"
+          phx-value-image="/images/cat-hunting-bird.webp"
+          phx-target={@myself}
         />
       </div>
     </div>
@@ -201,6 +219,27 @@ defmodule BirdpawWeb.Components.Promo do
     """
   end
 
+  defp image_modal(assigns) do
+    ~H"""
+    <div
+      id="image-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300 ease-out"
+    >
+      <div class="relative bg-white rounded-lg shadow-lg overflow-hidden max-w-full max-h-full p-4 sm:p-6">
+        <img src={@image} class="max-w-full max-h-full rounded-lg" alt="Full-size image" />
+        <!-- Close Button -->
+        <button
+          phx-click="close-modal"
+          phx-target={@myself}
+          class="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
+        >
+          ✖
+        </button>
+      </div>
+    </div>
+    """
+  end
+
   defp call_to_action(assigns) do
     ~H"""
     <!-- Container with background image and overlay -->
@@ -216,7 +255,6 @@ defmodule BirdpawWeb.Components.Promo do
       <div class="absolute inset-0 bg-gray-900 bg-opacity-75"></div>
       <!-- Button Content -->
       <div class="relative z-10 py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
-        <!-- Main Button -->
         <button class="bg-gradient-to-r from-purple-500 via-indigo-600 to-teal-500 hover:from-indigo-600 hover:via-purple-700 hover:to-teal-700
           text-white font-bold py-3 px-6 sm:py-4 sm:px-8 lg:py-5 lg:px-10
           rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105
@@ -225,7 +263,6 @@ defmodule BirdpawWeb.Components.Promo do
           ✨ Exclusive Access to $BIRDPAW - Don't Miss Out!
         </button>
       </div>
-      <!-- Decorative border at the bottom -->
       <div class="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-500">
       </div>
     </div>

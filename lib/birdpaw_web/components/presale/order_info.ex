@@ -8,6 +8,16 @@ defmodule BirdpawWeb.Components.OrderInfo do
   use BirdpawWeb, :live_component
 
   @impl true
+  def handle_event("toggle-details", _params, socket) do
+    {:noreply, assign(socket, :info_visible, !socket.assigns.info_visible)}
+  end
+
+  @impl true
+  def handle_event("select-field", %{"field" => field}, socket) do
+    {:noreply, assign(socket, :selected_field, String.to_atom(field))}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div
@@ -64,9 +74,7 @@ defmodule BirdpawWeb.Components.OrderInfo do
           >
             <p class="text-teal-300 font-medium">Wallet Address</p>
             <p class="text-white font-bold w-full break-all truncate overflow-wrap overflow-x-auto hover:whitespace-normal break-all">
-              <%= if assigns[:selected_field] == :wallet_address && @order.wallet_address != "",
-                do: @order.wallet_address,
-                else: if(@order.wallet_address == "", do: "N/A", else: @order.wallet_address) %>
+              <%= display_wallet_address(@order.wallet_address, assigns[:selected_field]) %>
             </p>
           </div>
           <!-- Other Fields (Order State, Amount of BIRDPAW, etc.) -->
@@ -109,13 +117,16 @@ defmodule BirdpawWeb.Components.OrderInfo do
     """
   end
 
-  @impl true
-  def handle_event("toggle-details", _params, socket) do
-    {:noreply, assign(socket, :info_visible, !socket.assigns.info_visible)}
-  end
+  defp display_wallet_address(wallet_address, selected_field) do
+    cond do
+      selected_field == :wallet_address && wallet_address != "" ->
+        wallet_address
 
-  @impl true
-  def handle_event("select-field", %{"field" => field}, socket) do
-    {:noreply, assign(socket, :selected_field, String.to_atom(field))}
+      wallet_address == "" ->
+        "N/A"
+
+      true ->
+        String.slice(wallet_address, 0..20) <> "..."
+    end
   end
 end

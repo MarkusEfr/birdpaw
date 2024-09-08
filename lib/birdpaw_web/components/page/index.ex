@@ -122,6 +122,8 @@ defmodule BirdpawWeb.Page.Index do
           id="promo"
           toggle_buy_token={@toggle_buy_token}
           presale_form={@presale_form}
+          modal_image={nil}
+
         />
         <div
           id="memes"

@@ -1,6 +1,8 @@
 defmodule BirdpawWeb.Components.OrderTable do
   use BirdpawWeb, :live_component
 
+  import Birdpaw.Presale, only: [get_presale_order!: 1]
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -40,7 +42,9 @@ defmodule BirdpawWeb.Components.OrderTable do
               <td :if={@is_authorized_master} class="px-4 py-2">
                 <button
                   phx-click="manage_order"
-                  phx-value-order_id={order.uuid}
+                  phx-target={@myself}
+                  phx-value-order_id={order.id}
+                  phx-value-order_state={order.order_state}
                   class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg"
                 >
                   Manage
@@ -50,8 +54,29 @@ defmodule BirdpawWeb.Components.OrderTable do
           <% end %>
         </tbody>
       </table>
+      <!-- Render Modal if needed -->
+      <%= if @show_manage_modal do %>
+        <.live_component
+          module={BirdpawWeb.Components.ManageOrderModal}
+          id="manage_order_modal"
+          order={@order_to_manage}
+        />
+      <% end %>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event("manage_order", %{"order_id" => order_id}, socket) do
+    # Fetch the current order data and open the manage modal
+    order = get_presale_order!(order_id)
+
+    {:noreply, assign(socket, order_to_manage: order, show_manage_modal: true)}
+  end
+
+  @impl true
+  def handle_event("close_manage_modal", _params, socket) do
+    {:noreply, assign(socket, show_manage_modal: false, show_order_table: true, order_to_manage: nil)}
   end
 
   # Helper function for the status color

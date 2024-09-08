@@ -66,7 +66,7 @@ defmodule Birdpaw.PresaleUtil do
 
     orders =
       search_params
-      |> Birdpaw.Presale.get_orders_by_params()
+      |> get_orders_by_params()
       |> Enum.map(fn order ->
         %{
           id: order.id,
@@ -133,6 +133,14 @@ defmodule Birdpaw.PresaleUtil do
   def update_order_state(order, new_state) do
     %{order | order_state: new_state}
 
-    update_presale_order(order, new_state)
+    case update_presale_order(order, %{order_state: new_state}) do
+      {:ok, %Birdpaw.PresaleOrder{} = updated_order} ->
+        updated_order
+
+      _ ->
+        order
+    end
   end
+
+  def define_index_based_on_page(data), do: data.page * get_page_size() - get_page_size()
 end

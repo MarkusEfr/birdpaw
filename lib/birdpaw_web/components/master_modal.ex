@@ -7,7 +7,6 @@ defmodule BirdpawWeb.Components.MasterModal do
   def render(assigns) do
     ~H"""
     <div
-      id="password-modal"
       class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -43,6 +42,7 @@ defmodule BirdpawWeb.Components.MasterModal do
     """
   end
 
+  @impl true
   def handle_event("verify_password", %{"master_password" => entered_password}, socket) do
     # Get the hashed password from the environment variable
     stored_hash = Application.get_env(:birdpaw, :master_password_hash)

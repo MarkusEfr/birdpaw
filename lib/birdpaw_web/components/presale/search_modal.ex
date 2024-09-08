@@ -8,7 +8,6 @@ defmodule BirdpawWeb.Components.SearchModal do
   def render(assigns) do
     ~H"""
     <div
-      id="search-modal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300 ease-out sm:p-4 p-2"
     >
       <div class="bg-white text-gray-800 rounded-lg p-4 sm:p-6 w-full max-w-3xl sm:max-w-5xl h-full max-h-full sm:mx-auto shadow-xl relative transform transition-all duration-300 ease-out overflow-auto">
@@ -62,8 +61,9 @@ defmodule BirdpawWeb.Components.SearchModal do
               module={OrderTable}
               orders={@orders_data.orders}
               selected={@orders_data.selected}
-              index={@orders_data.page * get_page_size() - get_page_size()}
+              index={define_index_based_on_page(@orders_data)}
               is_authorized_master={@is_authorized_master}
+              show_manage_modal={@show_manage_modal}
             />
           </div>
           <!-- Pagination Controls -->

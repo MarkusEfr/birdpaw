@@ -147,7 +147,7 @@ defmodule BirdpawWeb.Components.Promo do
 
         true ->
           # Return empty orders if the query is not valid
-          %{orders_data | orders: [], selected: nil, total_pages: 1, page: 1}
+          %{orders_data | orders: [], total_pages: 1, page: 1}
       end
 
     # Assign the updated orders_data with the search_query
@@ -236,6 +236,7 @@ defmodule BirdpawWeb.Components.Promo do
         loading={false}
         error_message={nil}
         is_authorized_master={@is_authorized_master}
+        show_manage_modal={@show_manage_modal}
       />
       <!-- Existing modal and promo components -->
       <%= if @toggle_buy_token do %>

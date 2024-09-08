@@ -52,9 +52,7 @@ defmodule BirdpawWeb.Components.OrderInfo do
           >
             <p class="text-teal-300 font-medium">Order ID</p>
             <p class="text-white font-bold w-full break-all truncate overflow-wrap overflow-x-auto hover:whitespace-normal break-all">
-              <%= if assigns[:selected_field] == :order_id,
-                do: @order.uuid,
-                else: String.slice(@order.uuid, 0..12) <> "..." %>
+              <%= @order.uuid %>
             </p>
           </div>
           <!-- Wallet Address -->
@@ -66,9 +64,9 @@ defmodule BirdpawWeb.Components.OrderInfo do
           >
             <p class="text-teal-300 font-medium">Wallet Address</p>
             <p class="text-white font-bold w-full break-all truncate overflow-wrap overflow-x-auto hover:whitespace-normal break-all">
-              <%= if assigns[:selected_field] == :wallet_address,
+              <%= if assigns[:selected_field] == :wallet_address && @order.wallet_address != "",
                 do: @order.wallet_address,
-                else: String.slice(@order.wallet_address, 0..12) <> "..." %>
+                else: if(@order.wallet_address == "", do: "N/A", else: @order.wallet_address) %>
             </p>
           </div>
           <!-- Other Fields (Order State, Amount of BIRDPAW, etc.) -->

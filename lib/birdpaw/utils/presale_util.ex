@@ -30,8 +30,6 @@ defmodule Birdpaw.PresaleUtil do
           raise "Unsupported payment method"
       end
 
-    IO.inspect(payment_uri, label: "payment_uri")
-
     png_settings = %QRCode.Render.PngSettings{qrcode_color: {17, 170, 136}, scale: 5}
 
     {:ok, qr_code_binary} =
@@ -79,8 +77,7 @@ defmodule Birdpaw.PresaleUtil do
       end)
       |> Enum.sort_by(fn order -> order.timestamp end, &>/2)
 
-    total_orders = Enum.count(orders) |> IO.inspect(label: "total_orders")
-
+    total_orders = Enum.count(orders)
     if total_orders > 0 do
       %{
         orders: orders,
@@ -97,7 +94,6 @@ defmodule Birdpaw.PresaleUtil do
         total_pages: 1
       }
     end
-    |> IO.inspect(label: "fetch_orders")
   end
 
   # Helper function to build search parameters based on search query

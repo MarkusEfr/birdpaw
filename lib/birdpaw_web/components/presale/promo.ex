@@ -56,7 +56,6 @@ defmodule BirdpawWeb.Components.Promo do
     amount = calculate_amount(birdpaw_amount, payment_method)
     updated_presale_form = %{presale_form | payment_method: payment_method, amount: amount}
 
-    IO.inspect(updated_presale_form, label: "updated_presale_form")
     {:noreply, assign(socket, presale_form: updated_presale_form)}
   end
 

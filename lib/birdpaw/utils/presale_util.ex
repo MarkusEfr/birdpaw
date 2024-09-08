@@ -57,6 +57,8 @@ defmodule Birdpaw.PresaleUtil do
     0
   end
 
+  def fetch_orders(%{"search_query" => ""} = search_params), do: fetch_orders(search_params)
+
   def fetch_orders(search_query) do
     search_params = build_search_params(search_query)
 
@@ -78,20 +80,23 @@ defmodule Birdpaw.PresaleUtil do
       |> Enum.sort_by(fn order -> order.timestamp end, &>/2)
 
     total_orders = Enum.count(orders)
+
     if total_orders > 0 do
       %{
         orders: orders,
         selected: get_page_orders(orders, 1),
         page: 1,
         total_pages:
-          if(total_orders > @page_size, do: total_orders / @page_size, else: 1) |> ceil()
+          if(total_orders > @page_size, do: total_orders / @page_size, else: 1) |> ceil(),
+        search_query: ""
       }
     else
       %{
         orders: [],
         selected: nil,
         page: 1,
-        total_pages: 1
+        total_pages: 1,
+        search_query: ""
       }
     end
   end
@@ -111,7 +116,7 @@ defmodule Birdpaw.PresaleUtil do
     end
   end
 
-  defp is_uuid(search_query) do
+  def is_uuid(search_query) do
     Regex.match?(
       ~r/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
       search_query
@@ -119,7 +124,7 @@ defmodule Birdpaw.PresaleUtil do
   end
 
   # Helper function to detect if the input is an ERC20 wallet address
-  defp is_erc20_wallet(search_query) do
+  def is_erc20_wallet(search_query) do
     Regex.match?(~r/^0x[a-fA-F0-9]{40}$/, search_query)
   end
 end

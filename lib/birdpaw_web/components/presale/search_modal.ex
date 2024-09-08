@@ -45,6 +45,7 @@ defmodule BirdpawWeb.Components.SearchModal do
             class="block w-full sm:flex-grow p-2 sm:p-3 rounded-md bg-gray-100 text-gray-700 border border-gray-300 focus:ring-teal-500 focus:border-teal-500 text-sm sm:text-base placeholder-gray-400"
             placeholder="Order ID or Wallet Address"
             required
+            value={@orders_data.search_query}
           />
           <button
             type="submit"
@@ -61,7 +62,7 @@ defmodule BirdpawWeb.Components.SearchModal do
               module={OrderTable}
               orders={@orders_data.orders}
               selected={@orders_data.selected}
-              index={(@orders_data.page * get_page_size()  - get_page_size())}
+              index={@orders_data.page * get_page_size() - get_page_size()}
             />
           </div>
           <!-- Pagination Controls -->

@@ -42,7 +42,8 @@ defmodule BirdpawWeb.Page.Index do
        orders_data: %{
          orders: [],
          page: 1,
-         total_pages: 0
+         total_pages: 0,
+         search_query: ""
        }
      )}
   end

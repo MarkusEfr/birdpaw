@@ -122,9 +122,36 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   @impl true
-  def handle_event("search_orders", %{"search_query" => search_query}, socket) do
-    orders_data = fetch_orders(search_query)
-    {:noreply, assign(socket, orders_data: orders_data)}
+  def handle_event(
+        "search_orders",
+        %{"search_query" => search_query},
+        %{assigns: %{orders_data: orders_data}} = socket
+      ) do
+    # Trim any leading or trailing spaces from the search query
+    search_query = String.trim(search_query)
+
+    # Check if the search query is a UUID or ERC20 wallet outside of the guard clause
+    orders_data =
+      cond do
+        search_query == "" ->
+          # If the query is empty, return unchanged orders_data
+          orders_data
+
+        is_uuid(search_query) ->
+          # Fetch orders based on the search_query as a UUID
+          fetch_orders(search_query)
+
+        is_erc20_wallet(search_query) ->
+          # Fetch orders based on the search_query as an ERC20 wallet
+          fetch_orders(search_query)
+
+        true ->
+          # Return empty orders if the query is not valid
+          %{orders_data | orders: [], selected: nil, total_pages: 1, page: 1}
+      end
+
+    # Assign the updated orders_data with the search_query
+    {:noreply, assign(socket, orders_data: %{orders_data | search_query: search_query})}
   end
 
   @impl true

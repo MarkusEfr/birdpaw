@@ -123,13 +123,163 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   @impl true
+  def handle_event("search_orders", %{"search_query" => search_query}, socket) do
+    # Your logic to fetch orders by search query
+    orders = fetch_orders(search_query)
+    {:noreply, assign(socket, orders: orders)}
+  end
+
+  @impl true
+  def handle_event("show-search-results", _params, socket) do
+    {:noreply, assign(socket, :show_search_modal, true)}
+  end
+
+  @impl true
+  def handle_event("close-search-results", _params, socket) do
+    {:noreply, assign(socket, :show_search_modal, false)}
+  end
+
+  defp fetch_orders(search_query) do
+    # Replace this with your actual search logic.
+    # Example: filtering orders by Order ID or Wallet Address.
+    []
+  end
+
   def render(assigns) do
     ~H"""
-    <div id="promo-section" class="text-white py-6 sm:py-8 md:py-10 bg-gray-900">
+    <div id="promo-section" class="text-white py-6 sm:py-8 md:py-10 bg-gray-900 relative">
+      <!-- Promo Header and Content -->
       <.header_section myself={@myself} />
       <.token_info_section />
       <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
-
+      <!-- Results Table (Hidden initially, shows after search) -->
+      <div id="order-search-trigger" class="mt-8 text-center">
+        <!-- Icon or Button to trigger search results with dark rare style -->
+        <button
+          phx-click="show-search-results"
+          phx-target={@myself}
+          class="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105 duration-300 ease-in-out"
+        >
+          <span class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-teal-400 opacity-0 hover:opacity-30 rounded-full transition-opacity duration-300 ease-in-out">
+          </span>
+          🔍 Search Orders
+        </button>
+        <!-- Modal for search results -->
+        <%= if @show_search_modal do %>
+          <div
+            id="order-search-results-modal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-95 transition-opacity duration-300 ease-out"
+          >
+            <div class="bg-gray-800 text-white rounded-lg p-5 sm:p-6 w-full max-w-2xl mx-4 sm:mx-auto shadow-2xl relative">
+              <!-- Close Button -->
+              <button
+                phx-click="close-search-results"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-200 transition-colors duration-300"
+              >
+                ✖
+              </button>
+              <!-- Search Results Content -->
+              <div class="overflow-x-auto p-4 rounded-lg shadow-lg">
+                <%= if length(@orders) > 0 do %>
+                  <table class="min-w-full text-left text-sm sm:text-base rounded-md">
+                    <thead>
+                      <tr class="bg-gray-700">
+                        <th class="py-2 px-4 text-indigo-400 font-semibold">Order ID</th>
+                        <th class="py-2 px-4 text-indigo-400 font-semibold">Wallet Address</th>
+                        <th class="py-2 px-4 text-indigo-400 font-semibold">Amount</th>
+                        <th class="py-2 px-4 text-indigo-400 font-semibold">Order State</th>
+                        <th class="py-2 px-4 text-indigo-400 font-semibold"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <%= for order <- @orders do %>
+                        <tr class="bg-gray-800 hover:bg-gray-700 transition">
+                          <td class="py-2 px-4 truncate text-gray-200"><%= order.uuid %></td>
+                          <td class="py-2 px-4 truncate text-gray-200">
+                            <%= order.wallet_address %>
+                          </td>
+                          <td class="py-2 px-4 truncate text-gray-200">
+                            <%= order.amount %> $BIRDPAW
+                          </td>
+                          <td class="py-2 px-4 truncate text-gray-200"><%= order.order_state %></td>
+                          <td class="py-2 px-4">
+                            <button
+                              phx-click="view_order"
+                              phx-value-order_id={order.uuid}
+                              class="bg-indigo-500 hover:bg-indigo-600 text-white py-1 px-3 rounded-md transition-all duration-300"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                <% else %>
+                  <p class="text-center text-gray-400 mt-6">No orders found.</p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <!-- Search Results Modal -->
+      <%= if @show_search_modal do %>
+        <div
+          id="search-modal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80 transition-opacity duration-300 ease-out sm:p-4"
+        >
+          <div class="bg-gray-800 text-white rounded-lg p-5 sm:p-6 w-full h-full max-w-lg sm:max-w-2xl mx-auto sm:max-h-full sm:h-auto shadow-2xl relative transform transition-all duration-300 ease-out scale-100">
+            <button
+              phx-click="close-search-results"
+              phx-target={@myself}
+              class="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
+            >
+              ✖
+            </button>
+            <!-- Results Table -->
+            <div id="order-search-results" class="mt-4">
+              <%= if length(@orders) > 0 do %>
+                <div class="overflow-x-auto bg-gray-700 p-4 rounded-lg shadow-lg">
+                  <table class="min-w-full text-left text-sm sm:text-base rounded-md">
+                    <thead>
+                      <tr class="bg-gray-600">
+                        <th class="py-2 px-4 text-teal-300 font-semibold">Order ID</th>
+                        <th class="py-2 px-4 text-teal-300 font-semibold">Wallet Address</th>
+                        <th class="py-2 px-4 text-teal-300 font-semibold">Amount</th>
+                        <th class="py-2 px-4 text-teal-300 font-semibold">Order State</th>
+                        <th class="py-2 px-4 text-teal-300 font-semibold"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <%= for order <- @orders do %>
+                        <tr class="bg-gray-700 hover:bg-gray-600 transition">
+                          <td class="py-2 px-4 truncate"><%= order.uuid %></td>
+                          <td class="py-2 px-4 truncate"><%= order.wallet_address %></td>
+                          <td class="py-2 px-4 truncate"><%= order.amount %> $BIRDPAW</td>
+                          <td class="py-2 px-4 truncate"><%= order.order_state %></td>
+                          <td class="py-2 px-4">
+                            <button
+                              phx-click="view_order"
+                              phx-value-order_id={order.uuid}
+                              class="bg-teal-500 hover:bg-teal-600 text-white py-1 px-3 rounded-md"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% else %>
+                <p class="text-center text-gray-400 mt-6">No orders found.</p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <!-- Existing modal and promo components -->
       <%= if @toggle_buy_token do %>
         <.modal myself={@myself}>
           <%= if @presale_form.is_confirmed? do %>
@@ -144,7 +294,6 @@ defmodule BirdpawWeb.Components.Promo do
           <% end %>
         </.modal>
       <% end %>
-      <!-- Modal for full-size images -->
       <%= if @modal_image do %>
         <.image_modal myself={@myself} image={@modal_image} />
       <% end %>
@@ -155,18 +304,20 @@ defmodule BirdpawWeb.Components.Promo do
   defp header_section(assigns) do
     ~H"""
     <div id="promo-header" class="text-center mb-8">
+      <!-- Title -->
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-200 tracking-wide">
         🚀 Ready to Launch into $BIRDPAW?
       </h1>
+      <!-- Fun Subheading -->
       <h2 class="text-base sm:text-lg md:text-xl font-medium text-gray-300 mb-6 leading-relaxed max-w-2xl mx-auto">
-        Are you ready to catch your next opportunity? Join the $BIRDPAW revolution where agility meets the future of decentralized finance.
+        Join the $BIRDPAW revolution where agility meets the future of decentralized finance.
       </h2>
-
+      <!-- Images with smaller size and dark rings -->
       <div class="flex justify-center items-center space-x-6 mt-6">
         <img
           src="/images/cat-rocket.webp"
           alt="Cat Rocket"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
           phx-click="show-image-modal"
           phx-value-image="/images/cat-rocket.webp"
           phx-target={@myself}
@@ -174,7 +325,7 @@ defmodule BirdpawWeb.Components.Promo do
         <img
           src="/images/birdpaw-coin.webp"
           alt="BirdPaw Coin"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
           phx-click="show-image-modal"
           phx-value-image="/images/birdpaw-coin.webp"
           phx-target={@myself}
@@ -182,7 +333,7 @@ defmodule BirdpawWeb.Components.Promo do
         <img
           src="/images/cat-hunting-bird.webp"
           alt="Cat Hunting Bird"
-          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500 cursor-pointer"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-gray-500"
           phx-click="show-image-modal"
           phx-value-image="/images/cat-hunting-bird.webp"
           phx-target={@myself}
@@ -206,36 +357,13 @@ defmodule BirdpawWeb.Components.Promo do
     ~H"""
     <div class="p-4 sm:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-xl shadow-lg text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
       <p class="text-base sm:text-lg font-medium text-gray-300 mb-2"><%= @title %></p>
-
       <%= if @progress do %>
         <div class="w-full h-2 bg-gray-600 rounded-full mt-2">
           <div class="h-2 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full" style="width: 50%;">
           </div>
         </div>
       <% end %>
-
       <p class="text-xl sm:text-2xl font-semibold text-white mt-3"><%= @value %></p>
-    </div>
-    """
-  end
-
-  defp image_modal(assigns) do
-    ~H"""
-    <div
-      id="image-modal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300 ease-out"
-    >
-      <div class="relative bg-white rounded-lg shadow-lg overflow-hidden max-w-full max-h-full p-4 sm:p-6">
-        <img src={@image} class="max-w-full max-h-full rounded-lg" alt="Full-size image" />
-        <!-- Close Button -->
-        <button
-          phx-click="close-modal"
-          phx-target={@myself}
-          class="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
-        >
-          ✖
-        </button>
-      </div>
     </div>
     """
   end
@@ -269,6 +397,27 @@ defmodule BirdpawWeb.Components.Promo do
     """
   end
 
+  defp image_modal(assigns) do
+    ~H"""
+    <div
+      id="image-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300 ease-out"
+    >
+      <div class="relative bg-white rounded-lg shadow-lg overflow-hidden max-w-full max-h-full p-4 sm:p-6">
+        <img src={@image} class="max-w-full max-h-full rounded-lg" alt="Full-size image" />
+        <!-- Close Button -->
+        <button
+          phx-click="close-modal"
+          phx-target={@myself}
+          class="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
+        >
+          ✖
+        </button>
+      </div>
+    </div>
+    """
+  end
+
   defp modal(assigns) do
     ~H"""
     <div
@@ -293,6 +442,5 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   defp get_presale_amount, do: @presale_amount
-
   defp get_cost_in_eth, do: @eth_cost
 end

@@ -5,7 +5,7 @@ defmodule Birdpaw.Presale do
 
   import Ecto.Query, warn: false
   alias Birdpaw.Repo
-  alias Birdpaw.Presale.PresaleOrder
+  alias Birdpaw.PresaleOrder
 
   @doc """
   Returns the list of presale_orders.

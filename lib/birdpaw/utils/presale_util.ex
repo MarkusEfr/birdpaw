@@ -3,6 +3,8 @@ defmodule Birdpaw.PresaleUtil do
   This module contains utility functions for the presale.
   """
 
+  import Birdpaw.Presale
+
   @eth_conversion_rate 6_000_000
   @usdt_conversion_rate 0.00042
   @usdt_decimal_factor :math.pow(10, 6) |> round()
@@ -126,5 +128,11 @@ defmodule Birdpaw.PresaleUtil do
   # Helper function to detect if the input is an ERC20 wallet address
   def is_erc20_wallet(search_query) do
     Regex.match?(~r/^0x[a-fA-F0-9]{40}$/, search_query)
+  end
+
+  def update_order_state(order, new_state) do
+    %{order | order_state: new_state}
+
+    update_presale_order(order, new_state)
   end
 end

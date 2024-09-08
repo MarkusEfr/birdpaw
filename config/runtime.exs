@@ -1,5 +1,9 @@
 import Config
 
+# Load environment variables from .env
+import Dotenvy
+
+source!([".env", System.get_env()])
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -19,6 +23,9 @@ import Config
 if System.get_env("PHX_SERVER") do
   config :birdpaw, BirdpawWeb.Endpoint, server: true
 end
+
+config :birdpaw,
+  master_password_hash: env!("MASTER_PASSWORD_HASH")
 
 if config_env() == :prod do
   database_url =

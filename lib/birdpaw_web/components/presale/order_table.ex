@@ -1,6 +1,7 @@
 defmodule BirdpawWeb.Components.OrderTable do
   use BirdpawWeb, :live_component
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="overflow-x-auto">
@@ -15,6 +16,7 @@ defmodule BirdpawWeb.Components.OrderTable do
             <th class="px-4 py-2">Payment Method</th>
             <th class="px-4 py-2">Status</th>
             <th class="px-4 py-2">Date</th>
+            <th :if={@is_authorized_master} class="px-4 py-2">Manage</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -33,6 +35,16 @@ defmodule BirdpawWeb.Components.OrderTable do
               </td>
               <td class="px-4 py-2 text-gray-500 truncate">
                 <%= order.timestamp %>
+              </td>
+
+              <td :if={@is_authorized_master} class="px-4 py-2">
+                <button
+                  phx-click="manage_order"
+                  phx-value-order_id={order.uuid}
+                  class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Manage
+                </button>
               </td>
             </tr>
           <% end %>

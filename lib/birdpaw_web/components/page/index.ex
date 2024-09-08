@@ -5,11 +5,21 @@ defmodule BirdpawWeb.Page.Index do
   use BirdpawWeb, :live_view
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket), do: Process.send_after(self(), :auto_slide, 5000)
+
+    show_master_modal =
+      case params do
+        # Example with a query param
+        %{"show_master" => "true"} -> true
+        _ -> false
+      end
 
     {:ok,
      assign(socket,
+       is_authorized_master: false,
+       show_master_modal: show_master_modal,
+       error_message: nil,
        current_slide: 0,
        faqs: [
          {"What is Birdcatcher Cats?",
@@ -66,11 +76,27 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
+  def handle_event("show_master_modal", _, socket) do
+    {:noreply, assign(socket, :show_master_modal, !socket.assigns.show_master_modal)}
+  end
+
+  @impl true
   def handle_info(:auto_slide, socket) do
     new_slide = rem(socket.assigns.current_slide + 1, length(slides()))
     # 5 seconds interval
     Process.send_after(self(), :auto_slide, 5000)
     {:noreply, assign(socket, :current_slide, new_slide)}
+  end
+
+  @impl true
+  def handle_info(:close_modal, socket) do
+    {:noreply,
+     assign(socket,
+       show_master_modal: false,
+       password_verified: true,
+       error_message: nil,
+       is_authorized_master: true
+     )}
   end
 
   defp slides do
@@ -131,7 +157,18 @@ defmodule BirdpawWeb.Page.Index do
           modal_image={nil}
           orders_data={@orders_data}
           show_search_modal={false}
+          is_authorized_master={@is_authorized_master}
         />
+        <!-- Conditionally render the Master Modal -->
+        <%= if @show_master_modal do %>
+          <.live_component
+            id="master-modal"
+            module={BirdpawWeb.Components.MasterModal}
+            is_authorized_master={@is_authorized_master}
+            show_master_modal={@show_master_modal}
+            error_message={@error_message}
+          />
+        <% end %>
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"

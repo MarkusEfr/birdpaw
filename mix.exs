@@ -61,6 +61,7 @@ defmodule Birdpaw.MixProject do
       {:bandit, "~> 1.5"},
       {:qr_code, "~> 3.0.0"},
       {:timex, "~> 3.7"},
+      {:dotenvy, "~> 0.8.0"}
     ]
   end
 

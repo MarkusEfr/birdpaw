@@ -60,7 +60,11 @@ defmodule BirdpawWeb.Components.OrderTable do
   defp status_color(_), do: "bg-gray-400"
 
   @impl true
-  def handle_event("toggle_order_state", %{"order_id" => order_id}, socket) do
+  def handle_event(
+        "toggle_order_state",
+        %{"order_id" => order_id},
+        %{assigns: %{selected: selected}} = socket
+      ) do
     order = get_presale_order!(order_id)
 
     new_state =
@@ -71,16 +75,14 @@ defmodule BirdpawWeb.Components.OrderTable do
         _ -> "pending"
       end
 
-    case order |> update_order_state(%{order_state: new_state}) do
-      {:ok, order} ->
-        updated_orders = socket.assigns.orders_data.orders |> List.replace_at(order_id, order)
+    with {:ok, updated_order} <- update_order_state(order, new_state),
+         new_selected =
+           Enum.map(selected, fn s -> if s.id == order.id, do: updated_order, else: s end) do
+      send(self(), {:updated_order, updated_order})
 
-        {:noreply,
-         assign(socket, orders_data: %{socket.assigns.orders_data | orders: updated_orders})}
-
-      {:error, _} ->
-        {:noreply,
-         socket = assign(socket, orders_data: %{socket.assigns.orders_data | orders: []})}
+      {:noreply, socket |> assign(selected: new_selected)}
+    else
+      _ -> {:noreply, socket}
     end
   end
 end

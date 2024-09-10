@@ -135,7 +135,7 @@ defmodule Birdpaw.PresaleUtil do
 
     case update_presale_order(order, %{order_state: new_state}) do
       {:ok, %Birdpaw.PresaleOrder{} = updated_order} ->
-        updated_order
+        {:ok, updated_order}
 
       _ ->
         {:error, "Failed to update order state"}

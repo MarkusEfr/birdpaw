@@ -160,41 +160,18 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def handle_info(
-        {:update_order,
-         %Birdpaw.PresaleOrder{
-           id: id,
-           wallet_address: wallet,
-           birdpaw_amount: birdpaw_amount,
-           amount: amount,
-           order_state: order_state,
-           uuid: uuid,
-           timestamp: timestamp,
-           payment_method: payment_method
-         }, orders_data: orders_data},
-        _ = socket
+        {:updated_order, order},
+        %{assigns: assigns} = socket
       ) do
-    new_params = %{
-      orders_data: %{
-        loading: true,
-        selected: [],
-        orders: [],
-        page: 1,
-        total_pages: 0,
-        search_query: "",
-        order_to_manage: id |> String.to_integer() |> orders_data.order_to_manage
-      }
-    }
+    updated_orders =
+      Enum.map(assigns.orders_data.orders, fn o -> if o.id == order.id, do: order, else: o end)
 
-    {:noreply,
-     assign(socket,
-       orders_data: %{orders_data | orders: orders_data.orders},
-       selected: [orders_data |> new_params.order_to_manage]
-     )}
+    orders_data = %{assigns.orders_data | orders: updated_orders}
+    {:noreply, assign(socket, orders_data: orders_data)}
   end
 
   @impl true
-  def handle_info({:update_order, _}, socket) do
-    IO.inspect("error updating order")
+  def handle_info({:updated_order, nil}, socket) do
     {:noreply, socket}
   end
 

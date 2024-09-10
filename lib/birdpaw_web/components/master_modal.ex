@@ -27,12 +27,6 @@ defmodule BirdpawWeb.Components.MasterModal do
             >
               Submit
             </button>
-            <button
-              phx-click="close_modal"
-              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 ml-2"
-            >
-              Cancel
-            </button>
           </div>
         </form>
       </div>

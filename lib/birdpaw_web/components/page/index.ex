@@ -87,16 +87,6 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
-  def handle_event("show_master_modal", _params, socket) do
-    {:noreply, assign(socket, :show_master_modal, !socket.assigns.show_master_modal)}
-  end
-
-  @impl true
-  def handle_event("close_master_modal", _params, socket) do
-    {:noreply, assign(socket, :toggle_buy_token, !socket.assigns.toggle_buy_token)}
-  end
-
-  @impl true
   def handle_event(
         "update_order_state",
         %{"order_id" => order_id, "order_state" => new_state},
@@ -124,19 +114,6 @@ defmodule BirdpawWeb.Page.Index do
      assign(socket,
        orders_data: %{socket.assigns.orders_data | orders: updated_orders}
      )}
-  end
-
-  @impl true
-  def handle_event(
-        "manage_order",
-        %{"order_id" => order_id},
-        %{assigns: %{orders_data: _orders_data}} = socket
-      ) do
-    # Fetch the order by id
-    order = order_id |> String.to_integer() |> get_presale_order!()
-
-    # Assign the order to the modal and open the modal
-    {:noreply, socket |> assign(order_to_manage: order)}
   end
 
   @impl true

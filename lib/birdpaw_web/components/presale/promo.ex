@@ -243,7 +243,6 @@ defmodule BirdpawWeb.Components.Promo do
         loading={false}
         error_message={nil}
         is_authorized_master={@is_authorized_master}
-        show_master_modal={@show_master_modal}
       />
       <!-- Existing modal and promo components -->
       <%= if @toggle_buy_token do %>

@@ -31,7 +31,9 @@ defmodule BirdpawWeb.Components.OrderTable do
               <td class="px-4 py-2 truncate w-32"><%= order.birdpaw_amount %></td>
               <td class="px-4 py-2 text-teal-600"><%= order.amount %></td>
               <td class="px-4 py-2 truncate w-32"><%= order.payment_method %></td>
-              <td class="px-4 py-2 truncate w-32"><%= order.timestamp %></td>
+              <td class="px-4 py-2 truncate w-32">
+                <%= order.timestamp |> Timex.format!("%Y-%m-%d %H:%M", :strftime) %>
+              </td>
               <td class="px-4 py-2">
                 <span class={"rounded px-2 py-1 text-white #{status_color(order.order_state)}"}>
                   <%= order.order_state %>

@@ -63,7 +63,6 @@ defmodule BirdpawWeb.Components.SearchModal do
               selected={@orders_data.selected}
               index={define_index_based_on_page(@orders_data)}
               is_authorized_master={@is_authorized_master}
-              show_manage_modal={@show_manage_modal}
             />
           </div>
           <!-- Pagination Controls -->

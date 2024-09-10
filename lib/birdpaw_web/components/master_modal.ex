@@ -6,9 +6,7 @@ defmodule BirdpawWeb.Components.MasterModal do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    >
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <h3 class="text-lg mb-4 text-gray-900 font-bold">Enter Master Password</h3>
         <%= if @error_message do %>
@@ -48,7 +46,7 @@ defmodule BirdpawWeb.Components.MasterModal do
     stored_hash = Application.get_env(:birdpaw, :master_password_hash)
 
     if SecurityUtil.verify_master_password(entered_password, stored_hash) do
-      send(self(), :close_modal)
+      send(self(), :close_master_modal)
       {:noreply, assign(socket, :password_verified, true)}
     else
       {:noreply, assign(socket, :error_message, "Invalid password")}

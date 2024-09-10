@@ -155,6 +155,11 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   @impl true
+  def handle_event("show-search-results", %{is_open?: is_open} = _params, socket) do
+    {:noreply, assign(socket, :show_search_modal, is_open)}
+  end
+
+  @impl true
   def handle_event("show-search-results", _params, socket) do
     {:noreply, assign(socket, :show_search_modal, true)}
   end
@@ -220,6 +225,7 @@ defmodule BirdpawWeb.Components.Promo do
       <div class="mt-8 text-center">
         <button
           phx-click="show-search-results"
+          phx-value-is_open="true"
           phx-target={@myself}
           class="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105 duration-300 ease-in-out"
         >
@@ -236,7 +242,7 @@ defmodule BirdpawWeb.Components.Promo do
         loading={false}
         error_message={nil}
         is_authorized_master={@is_authorized_master}
-        show_manage_modal={@show_manage_modal}
+        show_master_modal={@show_master_modal}
       />
       <!-- Existing modal and promo components -->
       <%= if @toggle_buy_token do %>

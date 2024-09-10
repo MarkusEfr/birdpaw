@@ -27,7 +27,6 @@ defmodule BirdpawWeb.Page.Index do
        is_authorized_master: false,
        show_master_modal: show_master_modal,
        show_search_modal: false,
-       show_manage_modal: false,
        error_message: nil,
        current_slide: 0,
        faqs: [
@@ -59,10 +58,13 @@ defmodule BirdpawWeb.Page.Index do
          payment_method: "ETH"
        },
        orders_data: %{
+         loading: true,
+         selected: [],
          orders: [],
          page: 1,
          total_pages: 0,
-         search_query: ""
+         search_query: "",
+         order_to_manage: nil
        }
      )}
   end
@@ -85,74 +87,56 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
-  def handle_event("show_master_modal", _, socket) do
+  def handle_event("show_master_modal", _params, socket) do
     {:noreply, assign(socket, :show_master_modal, !socket.assigns.show_master_modal)}
   end
 
   @impl true
-  def handle_event("close_modal", _зфкфьі_, socket) do
+  def handle_event("close_master_modal", _params, socket) do
     {:noreply, assign(socket, :toggle_buy_token, !socket.assigns.toggle_buy_token)}
   end
 
   @impl true
   def handle_event(
-        "update_order_status",
-        %{"order_state" => new_status, "order_id" => order_id} = _params,
-        %{assigns: %{orders_data: orders_data}} = socket
+        "update_order_state",
+        %{"order_id" => order_id, "order_state" => new_state},
+        socket
       ) do
-    with updated_order <-
-           order_id
-           |> get_presale_order!()
-           |> update_order_state(new_status) do
-      {:noreply,
-       assign(socket,
-         error_message: nil,
-         show_manage_modal: true,
-         show_order_table: true,
-         orders_data: %{
-           orders: [updated_order | orders_data.orders],
-           selected: [updated_order |  []],
-           page: 1,
-           total_pages: orders_data.total_pages || 1,
-           search_query: ""
-         }
-       )}
-    end
-  end
+    # Find and update the order state
+    updated_order =
+      order_id
+      |> String.to_integer()
+      |> get_presale_order!()
+      |> Map.put(:order_state, new_state)
+      |> update_order_state(new_state)
 
-  @impl true
-  def handle_info(
-        {:update_order, %Birdpaw.PresaleOrder{id: id, uuid: _uuid} = up_order},
-        %{
-          assigns: %{
-            orders_data:
-              %{
-                orders: orders,
-                page: _page,
-                total_pages: total_pages
-              } = orders_data
-          }
-        } = socket
-      ) do
-    # Update the order
-    orders = List.update_at(orders, id, fn _ -> up_order end)
-
-    orders_data = %{
-      orders_data
-      | orders: orders,
-        page: 1,
-        total_pages: total_pages
-    }
-
-    IO.inspect(orders_data, label: "orders_data")
+    # Update the list of orders and close the modal
+    updated_orders =
+      Enum.map(socket.assigns.orders_data.orders, fn order ->
+        if order.id == String.to_integer(order_id) do
+          updated_order
+        else
+          order
+        end
+      end)
 
     {:noreply,
      assign(socket,
-       show_manage_modal: false,
-       show_order_table: true,
-       order_to_manage: nil,
-       orders_data: orders_data
+       orders_data: %{socket.assigns.orders_data | orders: updated_orders}
      )}
+  end
+
+  @impl true
+  def handle_event(
+        "manage_order",
+        %{"order_id" => order_id},
+        %{assigns: %{orders_data: orders_data}} = socket
+      ) do
+    # Fetch the order by id
+    order = order_id |> String.to_integer() |> get_presale_order!()
+
+    # Assign the order to the modal and open the modal
+    {:noreply, socket |> assign(order_to_manage: order)}
   end
 
   @impl true
@@ -164,15 +148,54 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
-  def handle_info(:close_modal, socket) do
+  def handle_info(:close_master_modal, %{assigns: %{show_master_modal: value}} = socket) do
     {:noreply,
      assign(socket,
-       show_master_modal: false,
-       show_manage_modal: true,
-       password_verified: true,
+       show_master_modal: value,
+       password_verified: value,
        error_message: nil,
-       is_authorized_master: true
+       is_authorized_master: value
      )}
+  end
+
+  @impl true
+  def handle_info(
+        {:update_order,
+         %Birdpaw.PresaleOrder{
+           id: id,
+           wallet_address: wallet,
+           birdpaw_amount: birdpaw_amount,
+           amount: amount,
+           order_state: order_state,
+           uuid: uuid,
+           timestamp: timestamp,
+           payment_method: payment_method
+         }, orders_data: orders_data},
+        _ = socket
+      ) do
+    new_params = %{
+      orders_data: %{
+        loading: true,
+        selected: [],
+        orders: [],
+        page: 1,
+        total_pages: 0,
+        search_query: "",
+        order_to_manage: id |> String.to_integer() |> orders_data.order_to_manage
+      }
+    }
+
+    {:noreply,
+     assign(socket,
+       orders_data: %{orders_data | orders: orders_data.orders},
+       selected: [orders_data |> new_params.order_to_manage]
+     )}
+  end
+
+  @impl true
+  def handle_info({:update_order, _}, socket) do
+    IO.inspect("error updating order")
+    {:noreply, socket}
   end
 
   defp slides do
@@ -233,8 +256,8 @@ defmodule BirdpawWeb.Page.Index do
           modal_image={nil}
           orders_data={@orders_data}
           show_search_modal={@show_search_modal}
-          show_manage_modal={@show_manage_modal}
           is_authorized_master={@is_authorized_master}
+          show_master_modal={@show_master_modal}
         />
         <!-- Conditionally render the Master Modal -->
         <%= if @show_master_modal and not @is_authorized_master do %>

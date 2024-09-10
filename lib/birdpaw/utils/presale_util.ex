@@ -95,7 +95,7 @@ defmodule Birdpaw.PresaleUtil do
     else
       %{
         orders: [],
-        selected: nil,
+        selected: [],
         page: 1,
         total_pages: 1,
         search_query: ""
@@ -138,7 +138,7 @@ defmodule Birdpaw.PresaleUtil do
         updated_order
 
       _ ->
-        order
+        {:error, "Failed to update order state"}
     end
   end
 

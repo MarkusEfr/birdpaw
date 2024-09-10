@@ -17,6 +17,7 @@ defmodule BirdpawWeb.Components.OrderTable do
             <th class="px-4 py-2">Birdpaw Amount</th>
             <th class="px-4 py-2">Pay Amount</th>
             <th class="px-4 py-2">Payment Method</th>
+            <th class="px-4 py-2">Timestamp</th>
             <th class="px-4 py-2">Status</th>
             <th :if={@is_authorized_master} class="px-4 py-2">Manage</th>
           </tr>
@@ -30,6 +31,7 @@ defmodule BirdpawWeb.Components.OrderTable do
               <td class="px-4 py-2 truncate w-32"><%= order.birdpaw_amount %></td>
               <td class="px-4 py-2 text-teal-600"><%= order.amount %></td>
               <td class="px-4 py-2 truncate w-32"><%= order.payment_method %></td>
+              <td class="px-4 py-2 truncate w-32"><%= order.timestamp %></td>
               <td class="px-4 py-2">
                 <span class={"rounded px-2 py-1 text-white #{status_color(order.order_state)}"}>
                   <%= order.order_state %>

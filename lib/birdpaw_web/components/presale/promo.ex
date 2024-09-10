@@ -23,9 +23,17 @@ defmodule BirdpawWeb.Components.Promo do
           "payment_method" => payment_method,
           "amount" => amount
         } = _params,
-        %{assigns: %{presale_form: presale_form}} = socket
+        %{assigns: %{presale_form: %{wei_amount: wei_amount} = presale_form}} = socket
       ) do
     order_uuid = Ecto.UUID.generate()
+
+    qr_code_binary =
+      case {wallet_address, wei_amount} do
+        {_, ""} -> nil
+        _ -> generate_qr_code({wei_amount, amount}, order_uuid, payment_method)
+      end
+
+    presale_form = %{presale_form | qr_code_base64: qr_code_binary}
 
     order = %{
       wallet_address: wallet_address,
@@ -87,19 +95,12 @@ defmodule BirdpawWeb.Components.Promo do
 
     wei_amount = (amount * 1_000_000_000_000_000_000) |> round()
 
-    # Generate the QR code data based on the selected payment_method, amount, and address
-    qr_code_binary =
-      case {wallet_address, wei_amount} do
-        {_, ""} -> nil
-        _ -> generate_qr_code({wei_amount, amount}, wallet_address, payment_method)
-      end
-
     presale_form = %{
       amount: amount,
       wei_amount: wei_amount,
       wallet_address: wallet_address,
       birdpaw_amount: birdpaw_amount,
-      qr_code_base64: qr_code_binary,
+      qr_code_base64: nil,
       show_link: "/payments/qr_code_#{wallet_address}.png",
       is_confirmed?: false,
       payment_method: payment_method

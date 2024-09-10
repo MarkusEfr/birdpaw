@@ -76,7 +76,7 @@ defmodule BirdpawWeb.Components.OrderTable do
       end
 
     with {:ok, updated_order} <- update_order_state(order, new_state),
-         new_selected =
+         new_selected <-
            Enum.map(selected, fn s -> if s.id == order.id, do: updated_order, else: s end) do
       send(self(), {:updated_order, updated_order})
 

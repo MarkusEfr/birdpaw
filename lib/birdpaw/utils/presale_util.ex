@@ -17,16 +17,17 @@ defmodule Birdpaw.PresaleUtil do
   def get_page_orders(orders, page) when page == 1, do: Enum.slice(orders, 0, @page_size)
   def get_page_orders(orders, page), do: Enum.slice(orders, @page_size * (page - 1), @page_size)
 
-  def generate_qr_code({wei_amount, amount}, _wallet_address, payment_method) do
+  def generate_qr_code({wei_amount, amount}, order_uuid, payment_method) do
     payment_uri =
       case payment_method do
         "ETH" ->
-          "ethereum:#{@owner_wallet}?value=#{wei_amount}"
+          "ethereum:#{@owner_wallet}?value=#{wei_amount}&order_id=#{order_uuid}"
 
         "USDT" ->
+          amount = String.to_float(amount)
           usdt_amount_in_smallest_units = round(amount * @usdt_decimal_factor)
 
-          "ethereum:0xdAC17F958D2ee523a2206206994597C13D831ec7/transfer?address=#{@owner_wallet}&uint256=#{usdt_amount_in_smallest_units}"
+          "ethereum:0xdAC17F958D2ee523a2206206994597C13D831ec7/transfer?address=#{@owner_wallet}&uint256=#{usdt_amount_in_smallest_units}&order_id=#{order_uuid}"
 
         _ ->
           raise "Unsupported payment method"

@@ -161,14 +161,21 @@ defmodule BirdpawWeb.Page.Index do
   @impl true
   def handle_info(
         {:updated_order, updated_order},
-        %{assigns: assigns} = socket
+        %{assigns: _assigns} = socket
       ) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_info({:updated_order, nil}, socket) do
-    {:noreply, socket}
+    {:noreply,
+     socket
+     |> assign(
+       orders_data: %{
+         socket.assigns.orders_data
+         | orders:
+             socket.assigns.orders_data.orders
+             |> Enum.map(fn o -> if o.id == updated_order.id, do: updated_order, else: o end),
+           selected:
+             socket.assigns.orders_data.selected
+             |> Enum.map(&if(&1.id == updated_order.id, do: updated_order, else: &1))
+       }
+     )}
   end
 
   defp slides do

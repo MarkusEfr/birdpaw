@@ -130,7 +130,7 @@ defmodule BirdpawWeb.Page.Index do
   def handle_event(
         "manage_order",
         %{"order_id" => order_id},
-        %{assigns: %{orders_data: orders_data}} = socket
+        %{assigns: %{orders_data: _orders_data}} = socket
       ) do
     # Fetch the order by id
     order = order_id |> String.to_integer() |> get_presale_order!()
@@ -160,14 +160,10 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def handle_info(
-        {:updated_order, order},
+        {:updated_order, updated_order},
         %{assigns: assigns} = socket
       ) do
-    updated_orders =
-      Enum.map(assigns.orders_data.orders, fn o -> if o.id == order.id, do: order, else: o end)
-
-    orders_data = %{assigns.orders_data | orders: updated_orders}
-    {:noreply, assign(socket, orders_data: orders_data)}
+    {:noreply, socket}
   end
 
   @impl true

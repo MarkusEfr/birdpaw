@@ -17,7 +17,6 @@ defmodule BirdpawWeb.Router do
   scope "/api", BirdpawWeb do
     pipe_through :api
 
-    resources "/presale_orders", PresaleOrderController, only: [:new]
   end
 
   scope "/", BirdpawWeb do

@@ -135,26 +135,6 @@ defmodule BirdpawWeb.Page.Index do
      )}
   end
 
-  @impl true
-  def handle_info(
-        {:updated_order, updated_order},
-        %{assigns: _assigns} = socket
-      ) do
-    {:noreply,
-     socket
-     |> assign(
-       orders_data: %{
-         socket.assigns.orders_data
-         | orders:
-             socket.assigns.orders_data.orders
-             |> Enum.map(fn o -> if o.id == updated_order.id, do: updated_order, else: o end),
-           selected:
-             socket.assigns.orders_data.selected
-             |> Enum.map(&if(&1.id == updated_order.id, do: updated_order, else: &1))
-       }
-     )}
-  end
-
   defp slides do
     [
       %{
@@ -205,6 +185,7 @@ defmodule BirdpawWeb.Page.Index do
             contract_address={@contract_address}
           />
         </div>
+
         <.live_component
           module={BirdpawWeb.Components.Promo}
           id="promo"
@@ -225,6 +206,7 @@ defmodule BirdpawWeb.Page.Index do
             error_message={@error_message}
           />
         <% end %>
+
         <div
           id="memes"
           class="memes-section bg-gray-800 text-white py-6 md:py-10 mt-10 rounded-lg shadow-lg"

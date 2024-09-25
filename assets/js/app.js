@@ -2,34 +2,92 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import AnimateOnScroll from "./hooks/animate_on_scroll"
+import anime from 'animejs/lib/anime.es.js';
 
-let hooks = {}
+let hooks = {};
 
-hooks.ScrollReveal = {
+// Hook for Floating Text animation
+hooks.FloatingText = {
   mounted() {
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1
-    }
-
-    const callback = (entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-fadeInUp')
-          observer.unobserve(entry.target)
-        }
-      })
-    }
-
-    const observer = new IntersectionObserver(callback, options)
-    const items = document.querySelectorAll('.timeline-item')
-    items.forEach(item => observer.observe(item))
+    let textWrapper = this.el;
+    // Apply anime.js animation on the mounted element
+    anime({
+      targets: textWrapper,
+      opacity: [0, 1],
+      translateY: [-20, 0],
+      duration: 1500,
+      easing: 'easeOutExpo',
+      delay: anime.stagger(100) // stagger effect for text elements
+    });
   }
-}
+};
 
-hooks.AnimateOnScroll = AnimateOnScroll
+// Hook for Bubble Animation (using anime.js for continuous floating animation)
+hooks.BubbleAnimation = {
+  mounted() {
+    let bubbles = this.el.querySelectorAll(".bubble");
+    // Apply anime.js animation on bubbles
+    anime({
+      targets: bubbles,
+      translateY: [-10, 10],
+      loop: true,
+      direction: "alternate",
+      easing: "easeInOutSine",
+      duration: anime.stagger(3000, { start: 1000 }),
+      delay: anime.stagger(200),
+    });
+  }
+};
 
+// Hook for Button Animation on hover
+hooks.AnimatedButton = {
+  mounted() {
+    let button = this.el;
+    // Add hover event to trigger anime.js scaling animation
+    button.addEventListener("mouseenter", () => {
+      anime({
+        targets: button,
+        scale: 1.1,
+        duration: 300,
+        easing: 'easeOutExpo'
+      });
+    });
+    button.addEventListener("mouseleave", () => {
+      anime({
+        targets: button,
+        scale: 1,
+        duration: 300,
+        easing: 'easeOutExpo'
+      });
+    });
+  }
+};
+
+hooks.BirdAnimation = {
+  mounted() {
+    const birdElement = this.el;
+    let birdImages = ['/images/bird1.png', '/images/bird2.png', '/images/bird3.png']; // Add as many as you have
+
+    function animateBird() {
+      anime({
+        targets: birdElement,
+        translateX: [0, 50], // Horizontal movement
+        translateY: [0, -10], // Vertical movement
+        duration: 5000,
+        easing: 'easeInOutQuad',
+        loop: true,
+        direction: 'alternate',
+        complete: () => {
+          // Change bird image every time the animation completes
+          let randomBird = birdImages[Math.floor(Math.random() * birdImages.length)];
+          birdElement.src = randomBird;
+        }
+      });
+    }
+
+    animateBird();
+  }
+};
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", info => topbar.show())

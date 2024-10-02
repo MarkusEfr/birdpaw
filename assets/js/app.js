@@ -87,6 +87,41 @@ hooks.BirdAnimation = {
     clearInterval(this.interval);
   }
 };
+
+hooks.CopyToClipboard = {
+  mounted() {
+    const copyButton = this.el;
+
+    // Detect if we are copying from mobile or desktop
+    const contractAddressElement = this.el.id === "copy-btn-mobile"
+      ? document.getElementById("contract-address-mobile")
+      : document.getElementById("contract-address");
+
+    const feedbackElement = this.el.id === "copy-btn-mobile"
+      ? document.getElementById("copy-feedback-mobile")
+      : document.getElementById("copy-feedback");
+
+    copyButton.addEventListener('click', () => {
+      const contractAddress = contractAddressElement.textContent;
+
+      // Create a temporary input to copy the text
+      const tempInput = document.createElement('input');
+      document.body.appendChild(tempInput);
+      tempInput.value = contractAddress;
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      // Show the "Copied" message
+      feedbackElement.classList.remove('hidden');
+
+      // Hide the feedback message after 2 seconds
+      setTimeout(() => {
+        feedbackElement.classList.add('hidden');
+      }, 2000);
+    });
+  }
+};
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", info => topbar.show())

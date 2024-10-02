@@ -39,9 +39,33 @@ defmodule BirdpawWeb.Page.Index do
       <.header_section id="header" contract_address={@contract_address} />
       <!-- Full-Size Mobile Sidebar Menu -->
       <.mobile_menu_section id="mobile-menu" show_mobile_menu={@show_mobile_menu} section={@section} />
-      <!-- Mobile CA Box (only visible on mobile) -->
-      <div class="md:hidden bg-yellow-500 text-gray-900 py-2 px-4 text-center font-mono text-sm rounded-lg shadow-md w-full mt-16">
-        CA: <%= @contract_address %>
+      <!-- Mobile CA Box with Copy Button -->
+      <div class="md:hidden bg-yellow-500 text-gray-900 py-2 px-4 text-center font-mono text-sm rounded-lg shadow-md w-full mt-16 flex justify-center items-center space-x-2">
+        <span id="contract-address-mobile">
+          CA: <%= @contract_address %>
+        </span>
+        <!-- Copy Icon for Mobile -->
+        <button
+          id="copy-btn-mobile"
+          class="focus:outline-none bg-transparent hover:bg-yellow-600 hover:text-white transition-colors duration-300 p-2 rounded-md"
+          phx-hook="CopyToClipboard"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+          </svg>
+        </button>
+        <!-- Copied Message for Mobile -->
+        <span id="copy-feedback-mobile" class="hidden text-green-400 ml-2">Copied!</span>
       </div>
       <!-- Content Section with Background Image Centered -->
       <section class="relative flex-1 min-h-screen bg-cover bg-center bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 shadow-lg md:rounded-xl">
@@ -67,9 +91,33 @@ defmodule BirdpawWeb.Page.Index do
         <div class="hidden md:flex text-lg text-yellow-300 font-extrabold items-center transition-colors ease-in-out duration-300 hover:text-yellow-400">
           "Catch the bird, ride the Lambo!"
           <!-- Contract Address near Quote (for desktop only) -->
-          <span class="ml-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 py-1 px-4 rounded-lg shadow-md font-mono text-base transition-transform hover:scale-105 hover:bg-yellow-300 hover:text-gray-800">
-            CA: <%= @contract_address %>
-          </span>
+          <div class="ml-4 flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 py-1 px-4 rounded-lg shadow-md font-mono text-base transition-transform hover:scale-105 hover:bg-yellow-300 hover:text-gray-800">
+            <span id="contract-address">
+              CA: <%= @contract_address %>
+            </span>
+            <!-- Copy Icon -->
+            <button
+              id="copy-btn"
+              class="focus:outline-none bg-transparent hover:bg-yellow-600 hover:text-white transition-colors duration-300 p-2 rounded-md"
+              phx-hook="CopyToClipboard"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+              </svg>
+            </button>
+            <!-- Copied Message -->
+            <span id="copy-feedback" class="hidden text-green-400 ml-2">Copied!</span>
+          </div>
         </div>
         <!-- Mobile Menu Toggle Button -->
         <button

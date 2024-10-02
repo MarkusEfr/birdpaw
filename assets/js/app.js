@@ -65,27 +65,26 @@ hooks.AnimatedButton = {
 
 hooks.BirdAnimation = {
   mounted() {
-    const birdElement = this.el;
-    let birdImages = ['/images/bird1.png', '/images/bird2.png', '/images/bird3.png']; // Add as many as you have
+    const birdElement = this.el.querySelector('#bird');
+    let frame = 0;
+    const frames = [
+      "/images/bird/1.png",  // Path to first bird frame
+      "/images/bird/2.png",  // Path to second bird frame
+      // "/images/bird/3.png",  // Path to third bird frame
+      // "/images/bird/4.png"   // Path to fourth bird frame (add more as needed)
+    ];
+    const totalFrames = frames.length;
 
-    function animateBird() {
-      anime({
-        targets: birdElement,
-        translateX: [0, 50], // Horizontal movement
-        translateY: [0, -10], // Vertical movement
-        duration: 5000,
-        easing: 'easeInOutQuad',
-        loop: true,
-        direction: 'alternate',
-        complete: () => {
-          // Change bird image every time the animation completes
-          let randomBird = birdImages[Math.floor(Math.random() * birdImages.length)];
-          birdElement.src = randomBird;
-        }
-      });
-    }
+    const animateBird = () => {
+      frame = (frame + 1) % totalFrames;
+      birdElement.src = frames[frame];
+    };
 
-    animateBird();
+    this.interval = setInterval(animateBird, 200); // Switch frames every 200ms
+  },
+
+  destroyed() {
+    clearInterval(this.interval);
   }
 };
 // Show progress bar on live navigation and form submits

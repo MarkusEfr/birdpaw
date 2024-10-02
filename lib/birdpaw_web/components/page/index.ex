@@ -1,131 +1,223 @@
 defmodule BirdpawWeb.Page.Index do
   @moduledoc """
-  This module is used to render the redesigned index page.
+  This module is used to render the redesigned index page with a full-screen background, header, and a full-size sidebar for mobile devices.
   """
   use BirdpawWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800")}
+    {:ok,
+     socket
+     |> assign(
+       show_mobile_menu: false,
+       section: "Home",
+       contract_address: "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
+     )}
+  end
+
+  @impl true
+  def handle_event("toggle_menu", _, socket) do
+    {:noreply, assign(socket, :show_mobile_menu, !socket.assigns.show_mobile_menu)}
+  end
+
+  @impl true
+  def handle_event("show_content", %{"section" => section}, socket) do
+    {:noreply, assign(socket, :section, section)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <!-- Main Section with hooks for floating text and scroll reveal -->
-    <main class="relative min-h-screen bg-gradient-to-br from-blue-800 to-orange-600 text-gray-100">
-      <!-- Bubble Background Animation -->
-      <!-- Moving Bird Animation -->
-      <div id="bird-container" class="fixed bottom-4 right-4 z-50" phx-hook="BirdAnimation">
-        <img src="/images/bird1.png" id="bird" class="bird w-24 h-24" />
-      </div>
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="bubble bubble1"></div>
-        <div class="bubble bubble2"></div>
-        <div class="bubble bubble3"></div>
-      </div>
-      <!-- Floating Hero Section with FloatingText hook -->
-      <div
-        class="relative flex flex-col items-center justify-center text-center min-h-screen p-6 z-10"
-        phx-hook="FloatingText"
-        id="home"
-      >
-        <!-- Headline with enhanced visibility -->
-        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 text-transparent bg-clip-text
-                   bg-gradient-to-r from-cyan-400 via-pink-500 to-orange-500 drop-shadow-lg">
-          Maximize Your Profits with $BIRDPAW!
-        </h1>
-        <!-- Subheadline/Tagline with shadow -->
-        <p class="text-xl md:text-3xl mb-8 text-gray-100 drop-shadow-lg">
-          Revolutionizing Memes with Profits in Mind
-        </p>
-        <!-- CTA Button -->
-        <button class="bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-full text-lg md:text-xl font-bold
-                       transition-transform duration-300 ease-in-out transform hover:scale-105">
-          Get $BIRDPAW Now
-        </button>
-      </div>
-      <!-- Contract Address Section -->
-      <section class="absolute top-8 left-0 right-0 text-center bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 py-3 shadow-md">
-        <h2 class="text-sm md:text-lg font-semibold text-gray-900">Contract Address:</h2>
-        <div class="flex justify-center items-center gap-2 mt-1">
-          <p
-            id="contract-address"
-            class="text-sm md:text-lg text-gray-900 font-mono truncate w-full max-w-xs md:max-w-md"
-          >
-            <%= @contract_address %>
-          </p>
-          <!-- Copy Icon -->
-          <button
-            id="copy-ca"
-            class="text-gray-900 focus:outline-none hover:text-orange-600 transition-all"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 md:h-6 md:w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 7H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-3M16 5h3m-3 0v3m0-3l-5 5"
-              />
-            </svg>
-          </button>
+    <!-- Main Section with full-screen background and transparent header -->
+    <main class="relative min-h-screen flex flex-col overflow-hidden mx-auto">
+      <!-- Header -->
+      <.header_section id="header" contract_address={@contract_address} />
+      <!-- Full-Size Mobile Sidebar Menu -->
+      <.mobile_menu_section id="mobile-menu" show_mobile_menu={@show_mobile_menu} section={@section} />
+      <!-- Content Section with Background Image Centered -->
+      <section class="relative flex-1 min-h-screen bg-cover bg-center bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 shadow-lg md:rounded-xl">
+        <!-- Background Image Overlay with Centered Image -->
+        <div class="absolute inset-0 bg-[url('/images/hero_cat_1_mob.webp')] md:bg-[url('/images/hero_cat_3.webp')] bg-no-repeat bg-center bg-cover">
         </div>
+        <!-- Main Content Section for Desktop -->
+        <.main_content_section section={@section} />
       </section>
-      <!-- Tokenomics Section -->
-      <.tokenomics_section id="tokenomics" />
     </main>
     """
   end
 
-  defp tokenomics_section(assigns) do
+  defp header_section(assigns) do
     ~H"""
-    <section class="mt-16 flex flex-col justify-center items-center">
-      <!-- Container for Tokenomics boxes -->
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 p-6 w-full max-w-7xl">
-        <!-- Total Supply Box -->
-        <div class="token-box bg-white border border-gray-200 rounded-lg p-6 text-center shadow-lg transform transition-all hover:scale-105">
-          <div class="text-2xl mb-3">
-            <img src="/images/attributes/1.png" alt="Total Supply" class="w-10 h-10 mx-auto" />
-          </div>
-          <h3 class="text-lg md:text-xl font-semibold text-gray-900">Total Supply</h3>
-          <p class="text-gray-700 mt-2">1,000,000,000 $BIRDPAW tokens</p>
-          <p class="text-sm mt-2 text-gray-500">A meme coin with real value.</p>
+    <header class="absolute top-0 left-0 right-0 z-40 bg-opacity-70 bg-gray-800 text-white p-4 shadow-md backdrop-blur-md">
+      <div class="container mx-auto flex justify-between items-center">
+        <!-- Logo -->
+        <div class="text-2xl font-bold">
+          $BIRDPAW
         </div>
-        <!-- Ethereum Network Box -->
-        <div class="token-box bg-white border border-gray-200 rounded-lg p-6 text-center shadow-lg transform transition-all hover:scale-105">
-          <div class="text-2xl mb-3">
-            <img src="/images/attributes/2.png" alt="Ethereum Network" class="w-10 h-10 mx-auto" />
-          </div>
-          <h3 class="text-lg md:text-xl font-semibold text-gray-900">Ethereum Network</h3>
-          <p class="text-gray-700 mt-2">Built on the secure ERC-20 standard</p>
-          <p class="text-sm mt-2 text-gray-500">Powered by Ethereum’s decentralized tech.</p>
+        <!-- Desktop Quote -->
+        <div class="hidden md:flex text-lg text-yellow-300 font-extrabold items-center">
+          "Catch the bird, ride the Lambo!"
+            <!-- Contract Address near Quote (Moved left) -->
+          <span class="ml-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900 py-1 px-4 rounded-lg shadow-md font-mono text-base transition-transform hover:scale-105">
+            CA: <%= @contract_address %>
+          </span>
         </div>
-        <!-- Liquidity Locked Box -->
-        <div class="token-box bg-white border border-gray-200 rounded-lg p-6 text-center shadow-lg transform transition-all hover:scale-105">
-          <div class="text-2xl mb-3">
-            <img src="/images/attributes/3.png" alt="Liquidity Locked" class="w-10 h-10 mx-auto" />
-          </div>
-          <h3 class="text-lg md:text-xl font-semibold text-gray-900">Liquidity Locked</h3>
-          <p class="text-gray-700 mt-2">Locked for security and transparency</p>
-          <p class="text-sm mt-2 text-gray-500">Ensuring stability and long-term growth.</p>
-        </div>
-        <!-- $BIRDPAW Symbol Box -->
-        <div class="token-box bg-white border border-gray-200 rounded-lg p-6 text-center shadow-lg transform transition-all hover:scale-105">
-          <div class="text-2xl mb-3">
-            <img src="/images/attributes/4.png" alt="$BIRDPAW Symbol" class="w-10 h-10 mx-auto" />
-          </div>
-          <h3 class="text-lg md:text-xl font-semibold text-gray-900">$BIRDPAW Symbol</h3>
-          <p class="text-gray-700 mt-2">$BIRDPAW is ready to soar</p>
-          <p class="text-sm mt-2 text-gray-500">Join the meme revolution today!</p>
-        </div>
+        <!-- Mobile Menu Toggle Button -->
+        <button
+          class="md:hidden p-2 bg-yellow-500 rounded-md shadow-lg focus:outline-none"
+          phx-click="toggle_menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
       </div>
-    </section>
+    </header>
+    """
+  end
+
+  defp main_content_section(assigns) do
+    ~H"""
+    <div class="relative z-10 flex justify-start items-center min-h-screen mx-auto w-full px-4">
+      <!-- Left-Side Links Menu with Smoke Shadow Effect (Visible for md and larger screens) -->
+      <div class="relative flex flex-col space-y-6 text-left text-yellow-500 font-mono text-2xl md:text-3xl hidden md:flex">
+        <!-- Smoke Shadow Effect -->
+        <div class="absolute inset-0 opacity-60 rounded-md bg-gray-900 blur-lg -z-10"></div>
+        <!-- Links with SVG Icons -->
+        <a
+          href="#"
+          phx-click="show_content"
+          phx-value-section="Home"
+          class="flex items-center hover:text-yellow-300 hover:scale-105 transition-transform"
+        >
+          <img src="/images/menu/4.png" class="h-12 w-12 mr-2" alt="cat icon" /> Home
+        </a>
+        <a
+          href="#"
+          phx-click="show_content"
+          phx-value-section="Tokenomics"
+          class="flex items-center hover:text-yellow-300 hover:scale-105 transition-transform"
+        >
+          <img src="/images/menu/2.png" class="h-12 w-12 mr-2" alt="scroll icon" /> Tokenomics
+        </a>
+        <a
+          href="#"
+          phx-click="show_content"
+          phx-value-section="Roadmap"
+          class="flex items-center hover:text-yellow-300 hover:scale-105 transition-transform"
+        >
+          <img src="/images/menu/3.png" class="h-12 w-12 mr-2" alt="roadmap icon" /> Roadmap
+        </a>
+        <a
+          href="#"
+          phx-click="show_content"
+          phx-value-section="Contact"
+          class="flex items-center hover:text-yellow-300 hover:scale-105 transition-transform"
+        >
+          <img src="/images/menu/1.png" class="h-12 w-12 mr-2" alt="contact icon" /> Contact
+        </a>
+      </div>
+      <!-- Content Box that dynamically changes based on menu click -->
+      <.content_box id="content" section={@section} />
+    </div>
+    """
+  end
+
+  defp mobile_menu_section(assigns) do
+    ~H"""
+    <nav class={"fixed inset-0 z-50 bg-gray-900 bg-opacity-90 text-white transform transition-transform duration-300 ease-in-out #{if @show_mobile_menu, do: 'translate-y-0', else: '-translate-y-full'} md:hidden"}>
+      <div class="absolute top-0 right-0 p-4">
+        <!-- Close Button -->
+        <button
+          class="text-gray-100 bg-gray-800 bg-opacity-70 rounded-full p-2 shadow-lg"
+          phx-click="toggle_menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <!-- Mobile Menu Content (Full Screen) -->
+      <div class="flex flex-col justify-center items-center h-full space-y-8 text-2xl">
+        <h2 class="text-3xl font-bold text-yellow-300">"Profit is for the Fast"</h2>
+        <ul class="flex flex-col justify-start items-start space-y-4 text-lg font-mono">
+          <li>
+            <a
+              href="#"
+              class="flex items-center py-2 px-4 text-yellow-400 hover:bg-gray-700 rounded-md"
+            >
+              <img src="/images/menu/4.png" class="h-10 w-10 mr-2" alt="cat icon" /> Home
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              class="flex items-center py-2 px-4 text-yellow-400 hover:bg-gray-700 rounded-md"
+            >
+              <img src="/images/menu/2.png" class="h-10 w-10 mr-2" alt="scroll icon" /> Tokenomics
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              class="flex items-center py-2 px-4 text-yellow-400 hover:bg-gray-700 rounded-md"
+            >
+              <img src="/images/menu/3.png" class="h-10 w-10 mr-2" alt="roadmap icon" /> Roadmap
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              class="flex items-center py-2 px-4 text-yellow-400 hover:bg-gray-700 rounded-md"
+            >
+              <img src="/images/menu/1.png" class="h-10 w-10 mr-2" alt="contact icon" /> Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    """
+  end
+
+  defp content_box(assigns) do
+    ~H"""
+    <div class="ml-6 md:ml-12 p-6 rounded-lg bg-yellow-100 text-gray-900 border-2 border-gray-800 shadow-lg max-w-xl w-full text-center font-mono">
+      <%= cond do
+        @section == "Home" ->
+          "Welcome to Birdpaw! Enjoy the finest experience in meme coins and financial fun!"
+
+        @section == "Tokenomics" ->
+          "Explore the full tokenomics of Birdpaw including distribution, rewards, and deflation mechanisms."
+
+        @section == "Roadmap" ->
+          "Stay updated on our milestones! The Birdpaw roadmap will guide you through our upcoming developments."
+
+        @section == "Contact" ->
+          "Need help? Contact us via our support channels for any inquiries related to Birdpaw."
+      end %>
+    </div>
     """
   end
 end

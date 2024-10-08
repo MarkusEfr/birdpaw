@@ -61,6 +61,7 @@ defmodule BirdpawWeb.Page.Index do
             stroke-linejoin="round"
           >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+
             <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
           </svg>
         </button>
@@ -112,6 +113,7 @@ defmodule BirdpawWeb.Page.Index do
                 stroke-linejoin="round"
               >
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+
                 <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
               </svg>
             </button>
@@ -146,9 +148,9 @@ defmodule BirdpawWeb.Page.Index do
 
   defp main_content_section(assigns) do
     ~H"""
-    <div class="relative z-10 flex justify-start items-center min-h-screen mx-auto w-full px-4">
+    <div class="relative z-10 flex flex-col justify-start items-start min-h-screen mx-auto w-full px-4 mt-20">
       <!-- Left-Side Links Menu with Smoke Shadow Effect (Visible for md and larger screens) -->
-      <div class="relative flex flex-col space-y-6 text-left text-yellow-500 font-mono text-2xl md:text-3xl hidden md:flex">
+      <div class="relative flex flex-col space-y-6 text-left text-yellow-500 font-mono text-2xl md:text-3xl hidden md:flex ml-10">
         <!-- Smoke Shadow Effect -->
         <div class="absolute inset-0 opacity-60 rounded-md bg-gray-900 blur-lg -z-10"></div>
         <!-- Links with SVG Icons -->
@@ -160,6 +162,7 @@ defmodule BirdpawWeb.Page.Index do
         >
           <img src="/images/menu/4.png" class="h-12 w-12 mr-2" alt="cat icon" /> Home
         </a>
+
         <a
           href="#"
           phx-click="show_content"
@@ -168,6 +171,7 @@ defmodule BirdpawWeb.Page.Index do
         >
           <img src="/images/menu/2.png" class="h-12 w-12 mr-2" alt="scroll icon" /> Tokenomics
         </a>
+
         <a
           href="#"
           phx-click="show_content"
@@ -176,6 +180,7 @@ defmodule BirdpawWeb.Page.Index do
         >
           <img src="/images/menu/3.png" class="h-12 w-12 mr-2" alt="roadmap icon" /> Roadmap
         </a>
+
         <a
           href="#"
           phx-click="show_content"
@@ -185,8 +190,28 @@ defmodule BirdpawWeb.Page.Index do
           <img src="/images/menu/1.png" class="h-12 w-12 mr-2" alt="contact icon" /> Contact
         </a>
       </div>
-      <!-- Content Box that dynamically changes based on menu click -->
-      <.content_box id="content" section={@section} />
+      <.notice_section />
+    </div>
+    """
+  end
+
+  defp notice_section(assigns) do
+    ~H"""
+    <!-- Preview Text Notice Box for md+ devices -->
+    <div class="hidden md:block max-w-xl bg-gray-800 bg-opacity-80 border border-yellow-300 text-yellow-200 px-8 py-8 mt-4 rounded-xl shadow-xl mb-6 relative">
+      <!-- Notice Text with a more elegant and clean typography -->
+      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
+        In the strange world of Birdcatcher Cats, the story is simple: cats chase birds, but not for survival — for the thrill of it.
+      </p>
+      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
+        Each bird they catch is a metaphor for the unpredictable nature of crypto, where opportunities flutter by in chaotic patterns.
+      </p>
+      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
+        The cats, cool and collected, embody the patience and cunning required to seize those moments. Feathers fall as fortunes rise, with every pounce landing somewhere between calculated risk and cosmic play.
+      </p>
+      <p class="font-mono text-base text-left leading-relaxed tracking-wide">
+        There’s no rush, just cats doing what they do best: waiting, watching, and hunting down whatever fortune flies into their path.
+      </p>
     </div>
     """
   end
@@ -219,6 +244,7 @@ defmodule BirdpawWeb.Page.Index do
       <!-- Mobile Menu Content (Full Screen) -->
       <div class="flex flex-col justify-center items-center h-full space-y-8 text-2xl">
         <h2 class="text-3xl font-bold text-yellow-300">"Profit is for the Fast"</h2>
+
         <ul class="flex flex-col justify-start items-start space-y-4 text-lg font-mono">
           <li>
             <a
@@ -230,6 +256,7 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/4.png" class="h-10 w-10 mr-2" alt="cat icon" /> Home
             </a>
           </li>
+
           <li>
             <a
               href="#"
@@ -240,6 +267,7 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/2.png" class="h-10 w-10 mr-2" alt="scroll icon" /> Tokenomics
             </a>
           </li>
+
           <li>
             <a
               href="#"
@@ -250,6 +278,7 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/3.png" class="h-10 w-10 mr-2" alt="roadmap icon" /> Roadmap
             </a>
           </li>
+
           <li>
             <a
               href="#"
@@ -268,21 +297,99 @@ defmodule BirdpawWeb.Page.Index do
 
   defp content_box(assigns) do
     ~H"""
-    <div class="md:ml-12 md:p-6 p-4 rounded-lg bg-yellow-100 bg-opacity-70 md:bg-yellow-100 text-gray-900 border-2 border-gray-800 shadow-lg max-w-xl w-full text-center font-mono">
+    <div class="flex flex-col items-center justify-center space-y-6 mx-6">
       <%= cond do
-        @section == "Home" ->
-          "Welcome to Birdpaw! Enjoy the finest experience in meme coins and financial fun!"
-
-        @section == "Tokenomics" ->
-          "Explore the full tokenomics of Birdpaw including distribution, rewards, and deflation mechanisms."
-
-        @section == "Roadmap" ->
-          "Stay updated on our milestones! The Birdpaw roadmap will guide you through our upcoming developments."
-
-        @section == "Contact" ->
-          "Need help? Contact us via our support channels for any inquiries related to Birdpaw."
+        @section == "Home" -> render_home_content(assigns)
+        @section == "Tokenomics" -> render_tokenomics_content(assigns)
+        @section == "Roadmap" -> render_roadmap_content(assigns)
+        @section == "Contact" -> render_contact_content(assigns)
       end %>
     </div>
     """
   end
+
+  defp render_home_content(assigns) do
+    ~H"""
+    <div class="flex flex-col items-center space-y-6">
+      <!-- Home Cards -->
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <img class="w-full" src="/images/card_home_1.png" alt="Home Card 1" />
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Welcome to Birdpaw</div>
+          <p class="text-gray-700 text-base">Join the most exciting meme coin in the universe.</p>
+        </div>
+      </div>
+
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <img class="w-full" src="/images/card_home_2.png" alt="Home Card 2" />
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Exclusive Benefits</div>
+          <p class="text-gray-700 text-base">Holders gain access to unique rewards and features.</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp render_tokenomics_content(assigns) do
+    ~H"""
+    <div class="flex flex-col items-center space-y-6">
+      <!-- Tokenomics Cards -->
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Total Supply</div>
+          <p class="text-gray-700 text-base">1,000,000,000 $BIRDPAW</p>
+        </div>
+      </div>
+
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Distribution</div>
+          <p class="text-gray-700 text-base">
+            50% Public Sale, 25% Reserved, 15% Development, 10% Marketing.
+          </p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp render_roadmap_content(assigns) do
+    ~H"""
+    <div class="flex flex-col items-center space-y-6">
+      <!-- Roadmap Cards -->
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Phase 1: Launch</div>
+          <p class="text-gray-700 text-base">Token launch and community growth.</p>
+        </div>
+      </div>
+
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Phase 2: Listing</div>
+          <p class="text-gray-700 text-base">Get listed on major exchanges.</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp render_contact_content(assigns) do
+    ~H"""
+    <div class="flex flex-col items-center space-y-6">
+      <!-- Contact Info Card -->
+      <div class="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white p-4">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Get in Touch</div>
+          <p class="text-gray-700 text-base">
+            Contact us via Twitter or Medium for more info about $BIRDPAW.
+          </p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp preview_text, do: @preview_text
 end

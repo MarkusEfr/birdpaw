@@ -197,21 +197,28 @@ defmodule BirdpawWeb.Page.Index do
 
   defp notice_section(assigns) do
     ~H"""
-    <!-- Preview Text Notice Box for md+ devices -->
-    <div class="hidden md:block max-w-xl bg-gray-800 bg-opacity-80 border border-yellow-300 text-yellow-200 px-8 py-8 mt-4 rounded-xl shadow-xl mb-6 relative">
-      <!-- Notice Text with a more elegant and clean typography -->
-      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
-        In the strange world of Birdcatcher Cats, the story is simple: cats chase birds, but not for survival — for the thrill of it.
-      </p>
-      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
-        Each bird they catch is a metaphor for the unpredictable nature of crypto, where opportunities flutter by in chaotic patterns.
-      </p>
-      <p class="font-mono text-base text-left leading-relaxed tracking-wide mb-4">
-        The cats, cool and collected, embody the patience and cunning required to seize those moments. Feathers fall as fortunes rise, with every pounce landing somewhere between calculated risk and cosmic play.
-      </p>
-      <p class="font-mono text-base text-left leading-relaxed tracking-wide">
-        There’s no rush, just cats doing what they do best: waiting, watching, and hunting down whatever fortune flies into their path.
-      </p>
+    <!-- Retro old-panel style notice section -->
+    <div class="hidden md:block max-w-2xl ml-6 bg-gray-900 text-gray-100 border border-gray-700 rounded-md shadow-lg p-6 mt-6 mb-6 relative">
+      <!-- Old-school panel background effect -->
+      <div class="absolute inset-0 bg-gray-800 bg-opacity-70 rounded-md shadow-inner"></div>
+      <!-- Meme-style, witty Notice Content -->
+      <div class="relative z-10">
+        <h2 class="text-lg font-bold text-yellow-300 mb-3 tracking-wider">
+          Birdcatcher Cats: Pounce, Profit, Repeat!
+        </h2>
+        <p class="text-sm text-gray-300 leading-relaxed mb-4">
+          In the crypto jungle, only the coolest cats catch the fattest birds. No rush. No FOMO. Just vibe, wait, and strike when the bird flies close enough to grab with your paws.
+        </p>
+        <p class="text-sm text-gray-300 leading-relaxed mb-4">
+          Catch a bird? Congrats, you’re one Lambo closer to flexing on Twitter. Miss one? Meh, more birds will fly by. The hustle never stops, but the chill cats win.
+        </p>
+        <p class="text-sm text-gray-300 leading-relaxed">
+          So sharpen those claws, keep your shades on, and get ready for the next flight. The market’s wild, but cats like you? You’re wilder. 🐾
+        </p>
+      </div>
+      <!-- Beveled edges and retro inset shadow for the panel -->
+      <div class="absolute inset-0 z-0 border-gray-600 rounded-md bg-gray-700 shadow-lg pointer-events-none">
+      </div>
     </div>
     """
   end

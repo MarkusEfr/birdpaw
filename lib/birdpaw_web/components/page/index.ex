@@ -197,23 +197,26 @@ defmodule BirdpawWeb.Page.Index do
 
   defp notice_section(assigns) do
     ~H"""
-    <!-- Retro old-panel style notice section -->
-    <div class="hidden md:block max-w-2xl ml-6 bg-gray-900 text-gray-100 border border-gray-700 rounded-md shadow-lg p-6 mt-6 mb-6 relative">
-      <!-- Old-school panel background effect -->
+    <!-- Elegant animated notice section with anime.js -->
+    <div
+      class="hidden md:block max-w-2xl ml-6 bg-gray-900 text-gray-100 border border-gray-700 rounded-md shadow-lg p-6 mt-6 mb-6 relative notice-panel"
+      id="notice"
+    >
+      <!-- Background effect -->
       <div class="absolute inset-0 bg-gray-800 bg-opacity-70 rounded-md shadow-inner"></div>
-      <!-- Meme-style, witty Notice Content -->
+      <!-- Notice content with anime.js animation -->
       <div class="relative z-10">
         <h2 class="text-lg font-bold text-yellow-300 mb-3 tracking-wider">
           Birdcatcher Cats: Pounce, Profit, Repeat!
         </h2>
         <p class="text-sm text-gray-300 leading-relaxed mb-4">
-          In the crypto jungle, only the coolest cats catch the fattest birds. No rush. No FOMO. Just vibe, wait, and strike when the bird flies close enough to grab with your paws.
+          In the crypto jungle, only the coolest cats catch the fattest birds. No rush. No FOMO. Just vibe, wait, and strike when the bird flies close enough.
         </p>
         <p class="text-sm text-gray-300 leading-relaxed mb-4">
-          Catch a bird? Congrats, you’re one Lambo closer to flexing on Twitter. Miss one? Meh, more birds will fly by. The hustle never stops, but the chill cats win.
+          Catch a bird? Congrats, you’re one Lambo closer. Miss one? Meh, more will fly by. The hustle never stops.
         </p>
         <p class="text-sm text-gray-300 leading-relaxed">
-          So sharpen those claws, keep your shades on, and get ready for the next flight. The market’s wild, but cats like you? You’re wilder. 🐾
+          So, sharpen those claws, keep your shades on, and get ready for the next flight. 🐾
         </p>
       </div>
       <!-- Beveled edges and retro inset shadow for the panel -->
@@ -225,11 +228,11 @@ defmodule BirdpawWeb.Page.Index do
 
   defp mobile_menu_section(assigns) do
     ~H"""
-    <nav class={"fixed inset-0 z-50 bg-gray-900 bg-opacity-90 text-white transform transition-transform duration-300 ease-in-out #{if @show_mobile_menu, do: 'translate-y-0', else: '-translate-y-full'} md:hidden"}>
+    <nav class={"fixed inset-0 z-50 bg-gradient-to-br from-gray-900 to-gray-800 text-white transform transition-transform duration-300 ease-in-out #{if @show_mobile_menu, do: 'translate-y-0', else: '-translate-y-full'} md:hidden"}>
       <div class="absolute top-0 right-0 p-4">
         <!-- Close Button -->
         <button
-          class="text-gray-100 bg-gray-800 bg-opacity-70 rounded-full p-2 shadow-lg"
+          class="text-gray-100 bg-gray-800 bg-opacity-70 rounded-full p-2 shadow-lg hover:bg-gray-700"
           phx-click="toggle_menu"
         >
           <svg
@@ -248,7 +251,7 @@ defmodule BirdpawWeb.Page.Index do
           </svg>
         </button>
       </div>
-      <!-- Mobile Menu Content (Full Screen) -->
+      <!-- Menu Items -->
       <div class="flex flex-col justify-center items-center h-full space-y-8 text-2xl">
         <h2 class="text-3xl font-bold text-yellow-300">"Profit is for the Fast"</h2>
 
@@ -263,7 +266,6 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/4.png" class="h-10 w-10 mr-2" alt="cat icon" /> Home
             </a>
           </li>
-
           <li>
             <a
               href="#"
@@ -274,7 +276,6 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/2.png" class="h-10 w-10 mr-2" alt="scroll icon" /> Tokenomics
             </a>
           </li>
-
           <li>
             <a
               href="#"
@@ -285,7 +286,6 @@ defmodule BirdpawWeb.Page.Index do
               <img src="/images/menu/3.png" class="h-10 w-10 mr-2" alt="roadmap icon" /> Roadmap
             </a>
           </li>
-
           <li>
             <a
               href="#"

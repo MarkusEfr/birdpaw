@@ -52,7 +52,7 @@ defmodule BirdpawWeb.Components.Footer do
             </a>
 
             <a
-              href="https://t.me/officialBirdcatcherCats"
+              href="https://t.me/birdpaw_token"
               target="_blank"
               aria-label="Telegram"
               class="flex items-center space-x-2 hover:text-gray-400"
@@ -70,7 +70,7 @@ defmodule BirdpawWeb.Components.Footer do
             </a>
 
             <a
-              href="mailto:birdpaw@proton.me"
+              href="mailto:bird.catch@proton.me"
               aria-label="Email"
               class="flex items-center space-x-2 hover:text-gray-400"
             >

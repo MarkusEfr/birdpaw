@@ -2,6 +2,7 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import AnimateOnScroll from "./hooks/animate_on_scroll"
+import CheckBalances from "./hooks/check_balances"
 
 let hooks = {}
 
@@ -29,6 +30,7 @@ hooks.ScrollReveal = {
 }
 
 hooks.AnimateOnScroll = AnimateOnScroll
+hooks.CheckBalances = CheckBalances
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })

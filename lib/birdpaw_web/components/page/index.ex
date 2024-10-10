@@ -12,6 +12,15 @@ defmodule BirdpawWeb.Page.Index do
     ]
 
   @impl true
+  def handle_event(
+        "check_balances_result",
+        %{"address" => address, "eth_balance" => eth_balance},
+        socket
+      ) do
+    {:noreply, assign(socket, eth_balance: eth_balance, wallet_address: address)}
+  end
+
+  @impl true
   def mount(params, _session, socket) do
     if connected?(socket), do: Process.send_after(self(), :auto_slide, 5000)
 
@@ -24,6 +33,7 @@ defmodule BirdpawWeb.Page.Index do
 
     {:ok,
      assign(socket,
+       token_check_result: nil,
        is_authorized_master: false,
        show_master_modal: show_master_modal,
        show_search_modal: false,
@@ -55,7 +65,8 @@ defmodule BirdpawWeb.Page.Index do
          amount: 0.0,
          qr_code_base64: nil,
          is_confirmed?: false,
-         payment_method: "ETH"
+         payment_method: "ETH",
+         payment_variant: nil
        },
        orders_data: %{
          loading: true,
@@ -186,6 +197,10 @@ defmodule BirdpawWeb.Page.Index do
           />
         </div>
 
+        <button id="check-balances" phx-hook="CheckBalances" class="bg-blue-500 px-4 py-2 rounded">
+          Check Balances
+        </button>
+        <!-- Approve and Transfer Buttons (call the JavaScript functions) -->
         <.live_component
           module={BirdpawWeb.Components.Promo}
           id="promo"

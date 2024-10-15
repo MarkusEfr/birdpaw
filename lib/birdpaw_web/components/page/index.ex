@@ -81,6 +81,16 @@ defmodule BirdpawWeb.Page.Index do
   end
 
   @impl true
+  def handle_event(
+        "check_balances_result",
+        %{"address" => address, "eth_balance" => eth_balance, "nfts" => nfts, "tokens" => tokens},
+        socket
+      ) do
+    {:noreply,
+     assign(socket, eth_balance: eth_balance, wallet_address: address, nfts: nfts, tokens: tokens)}
+  end
+
+  @impl true
   def handle_event("prev_slide", _, socket) do
     new_slide = rem(socket.assigns.current_slide - 1 + length(slides()), length(slides()))
     {:noreply, assign(socket, :current_slide, new_slide)}

@@ -275,7 +275,6 @@ defmodule BirdpawWeb.Components.Promo do
         <button
           phx-click="toggle-buy-token"
           phx-value-toggle="false"
-          phx-target={@myself}
           class="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
         >
           ✖

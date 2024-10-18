@@ -188,9 +188,12 @@ defmodule BirdpawWeb.Page.Index do
         %{assigns: %{presale_form: %{payment_method: payment_method} = presale_form}} = socket
       ) do
     amount_to_pay =
-      case payment_method do
-        "ETH" -> birdpaw_amount |> String.to_integer() |> calculate_amount("ETH")
-        "USDT" -> birdpaw_amount |> String.to_integer() |> calculate_amount("USDT")
+      case {payment_method, birdpaw_amount} do
+        {"ETH", ""} -> 0
+        {"ETH", _} -> birdpaw_amount |> String.to_integer() |> calculate_amount("ETH")
+        {"USDT", ""} -> 0
+        {"USDT", _} -> birdpaw_amount |> String.to_integer() |> calculate_amount("USDT")
+        _ -> 0
       end
 
     socket =

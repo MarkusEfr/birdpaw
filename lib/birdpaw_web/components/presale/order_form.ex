@@ -114,7 +114,7 @@ defmodule BirdpawWeb.Components.OrderForm do
             type="submit"
             phx-disable-with="Processing..."
             hidden={@presale_form[:is_confirmed?]}
-            disabled={@presale_form[:amount] == 0.0}
+            disabled={checkout_disabled?(@presale_form)}
             class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg transition duration-300"
           >
             Confirm Purchase
@@ -139,5 +139,11 @@ defmodule BirdpawWeb.Components.OrderForm do
       <% end %>
     </div>
     """
+  end
+
+  defp checkout_disabled?(presale_form) do
+    presale_form[:birdpaw_amount] < 50_000 or
+      (presale_form[:payment_method] == "ETH" and presale_form[:amount] < 0.0080) or
+      (presale_form[:payment_method] == "USDT" and presale_form[:amount] < 21)
   end
 end

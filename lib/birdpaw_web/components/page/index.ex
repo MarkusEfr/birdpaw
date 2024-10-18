@@ -110,7 +110,9 @@ defmodule BirdpawWeb.Page.Index do
        | payment_variant: method,
          payment_method: payment_method,
          amount:
-           presale_form.birdpaw_amount |> String.to_integer() |> calculate_amount(payment_method)
+           if(presale_form.birdpaw_amount == nil, do: "0", else: presale_form.birdpaw_amount)
+           |> String.to_integer()
+           |> calculate_amount(payment_method)
      })}
   end
 
@@ -125,7 +127,10 @@ defmodule BirdpawWeb.Page.Index do
      |> assign(:presale_form, %{
        presale_form
        | payment_method: payment_method,
-         amount: birdpaw_amount |> String.to_integer() |> calculate_amount(payment_method)
+         amount:
+           if(birdpaw_amount == nil, do: "0", else: birdpaw_amount)
+           |> String.to_integer()
+           |> calculate_amount(payment_method)
      })}
   end
 
@@ -378,7 +383,11 @@ defmodule BirdpawWeb.Page.Index do
           />
         </div>
 
-        <button id="check-balances" phx-hook="CheckBalances" class="bg-blue-500 px-4 py-2 rounded">
+        <button
+          id="check-balances"
+          phx-hook="CheckBalances"
+          class="bg-blue-500 px-4 py-2 rounded hidden"
+        >
           Check Balances
         </button>
         <!-- Approve and Transfer Buttons (call the JavaScript functions) -->

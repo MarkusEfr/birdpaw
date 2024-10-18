@@ -4,21 +4,8 @@ defmodule BirdpawWeb.Page.Index do
   """
   use BirdpawWeb, :live_view
 
-  import Birdpaw.Presale, only: [get_presale_order!: 1]
-
-  import Birdpaw.PresaleUtil,
-    only: [
-      update_order_state: 2
-    ]
-
-  @impl true
-  def handle_event(
-        "check_balances_result",
-        %{"address" => address, "eth_balance" => eth_balance},
-        socket
-      ) do
-    {:noreply, assign(socket, eth_balance: eth_balance, wallet_address: address)}
-  end
+  import Birdpaw.Presale
+  import Birdpaw.PresaleUtil
 
   @impl true
   def mount(params, _session, socket) do
@@ -33,7 +20,6 @@ defmodule BirdpawWeb.Page.Index do
 
     {:ok,
      assign(socket,
-       token_check_result: nil,
        is_authorized_master: false,
        show_master_modal: show_master_modal,
        show_search_modal: false,
@@ -57,8 +43,8 @@ defmodule BirdpawWeb.Page.Index do
        expanded: false,
        # Replace with your actual contract address
        contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800",
-       toggle_buy_token: false,
        presale_form: %{
+         is_open?: false,
          session_id: nil,
          wallet_address: nil,
          birdpaw_amount: nil,
@@ -76,18 +62,200 @@ defmodule BirdpawWeb.Page.Index do
          total_pages: 0,
          search_query: "",
          order_to_manage: nil
-       }
+       },
+       wallet_info: %{address: nil, eth_balance: nil, nfts: [], tokens: []},
+       order: nil
      )}
   end
 
   @impl true
   def handle_event(
-        "check_balances_result",
-        %{"address" => address, "eth_balance" => eth_balance, "nfts" => nfts, "tokens" => tokens},
-        socket
+        "set_wallet_basics",
+        %{"address" => address, "eth_balance" => eth_balance},
+        %{assigns: %{presale_form: presale_form}} = socket
       ) do
     {:noreply,
-     assign(socket, eth_balance: eth_balance, wallet_address: address, nfts: nfts, tokens: tokens)}
+     assign(socket,
+       wallet_info: %{address: address, eth_balance: eth_balance},
+       presale_form: %{presale_form | wallet_address: address}
+     )}
+  end
+
+  @impl true
+  def handle_event(
+        "set_payment_variant",
+        %{"variant" => payment_variant},
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    {:noreply, assign(socket, :presale_form, %{presale_form | payment_variant: payment_variant})}
+  end
+
+  @impl true
+  def handle_event(
+        "select-payment-method",
+        %{"method" => method},
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    # Assign the selected payment method to the form data
+    payment_method =
+      case method do
+        "wallet" -> "ETH"
+        _ -> Map.get(presale_form, :payment_method, "ETH")
+      end
+
+    {:noreply,
+     socket
+     |> assign(:presale_form, %{
+       presale_form
+       | payment_variant: method,
+         payment_method: payment_method,
+         amount:
+           presale_form.birdpaw_amount |> String.to_integer() |> calculate_amount(payment_method)
+     })}
+  end
+
+  @impl true
+  def handle_event(
+        "select-payment-method-type",
+        %{"payment_method" => payment_method},
+        %{assigns: %{presale_form: %{birdpaw_amount: birdpaw_amount} = presale_form}} = socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:presale_form, %{
+       presale_form
+       | payment_method: payment_method,
+         amount: birdpaw_amount |> String.to_integer() |> calculate_amount(payment_method)
+     })}
+  end
+
+  @impl true
+  def handle_event(
+        "calculate-eth",
+        %{
+          "birdpaw_amount" => birdpaw_amount,
+          "wallet_address" => wallet_address
+        },
+        %{assigns: %{presale_form: %{payment_variant: payment_variant} = presale_form}} = socket
+      ) do
+    payment_method = socket.assigns[:presale_form][:payment_method] || "ETH"
+
+    birdpaw_amount =
+      String.to_integer(birdpaw_amount)
+
+    # Calculate amount based on selected currency
+    amount =
+      case payment_method do
+        "ETH" ->
+          calculate_amount(birdpaw_amount, "ETH")
+
+        "USDT" ->
+          calculate_amount(birdpaw_amount, "USDT")
+
+        _ ->
+          0
+      end
+
+    wei_amount = (amount * 1_000_000_000_000_000_000) |> round()
+
+    presale_form = %{
+      amount: amount,
+      wei_amount: wei_amount,
+      wallet_address: wallet_address,
+      birdpaw_amount: birdpaw_amount,
+      qr_code_base64: nil,
+      show_link: "/payments/qr_code_#{wallet_address}.png",
+      is_confirmed?: false,
+      payment_method: payment_method,
+      payment_variant: payment_variant
+    }
+
+    {:noreply, assign(socket, presale_form: presale_form)}
+  end
+
+  @impl true
+  def handle_event(
+        "toggle-buy-token",
+        %{"toggle" => toggle},
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    {:noreply, assign(socket, :presale_form, %{presale_form | is_open?: toggle == "true"})}
+  end
+
+  def handle_event(
+        "calculate-amount",
+        %{"birdpaw_amount" => birdpaw_amount, "wallet_address" => wallet_address} = params,
+        %{assigns: %{presale_form: %{payment_method: payment_method} = presale_form}} = socket
+      ) do
+    amount_to_pay =
+      case payment_method do
+        "ETH" -> birdpaw_amount |> String.to_integer() |> calculate_amount("ETH")
+        "USDT" -> birdpaw_amount |> String.to_integer() |> calculate_amount("USDT")
+      end
+
+    socket =
+      assign(socket, :presale_form, %{
+        presale_form
+        | amount: amount_to_pay,
+          birdpaw_amount: birdpaw_amount
+      })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "confirm-buy-token",
+        %{
+          "birdpaw_amount" => birdpaw_amount,
+          "wallet_address" => wallet_address,
+          "payment_method" => payment_method,
+          "amount" => amount
+        } = _params,
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    order_uuid = Ecto.UUID.generate()
+    wei_amount = Map.get(presale_form, :wei_amount, 0)
+
+    qr_code_binary =
+      case {wallet_address, wei_amount} do
+        {_, ""} -> nil
+        _ -> generate_qr_code({wei_amount, amount}, order_uuid, payment_method)
+      end
+
+    presale_form = %{presale_form | qr_code_base64: qr_code_binary}
+
+    order = %{
+      wallet_address: wallet_address,
+      birdpaw_amount: birdpaw_amount,
+      payment_method: payment_method,
+      amount: amount,
+      is_confirmed?: true,
+      timestamp: DateTime.utc_now(),
+      uuid: order_uuid,
+      order_state: "pending",
+      qr_code_base64: presale_form[:qr_code_base64]
+    }
+
+    {:ok, _created_order} = create_presale_order(order)
+
+    {:noreply,
+     socket
+     |> assign(order: order, presale_form: Map.merge(presale_form, order))}
+  end
+
+  @impl true
+  def handle_event(
+        "check_balances_result",
+        %{"address" => address, "eth_balance" => eth_balance, "nfts" => nfts, "tokens" => tokens} =
+          params,
+        %{assigns: %{wallet_info: wallet_info, presale_form: presale_form}} = socket
+      ) do
+    # Merge the incoming params into the wallet_info map
+    updated_wallet_info = Map.merge(wallet_info, params)
+
+    # Assign the updated wallet_info back into the socket
+    {:noreply, assign(socket, :wallet_info, updated_wallet_info)}
   end
 
   @impl true
@@ -214,13 +382,14 @@ defmodule BirdpawWeb.Page.Index do
         <.live_component
           module={BirdpawWeb.Components.Promo}
           id="promo"
-          toggle_buy_token={@toggle_buy_token}
           presale_form={@presale_form}
           modal_image={nil}
           orders_data={@orders_data}
+          order={@order}
           show_search_modal={@show_search_modal}
           is_authorized_master={@is_authorized_master}
           show_master_modal={@show_master_modal}
+          wallet_info={@wallet_info}
         />
         <!-- Conditionally render the Master Modal -->
         <%= if @show_master_modal and not @is_authorized_master do %>

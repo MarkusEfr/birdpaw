@@ -14,129 +14,6 @@ defmodule BirdpawWeb.Components.Promo do
   @eth_cost "0.00000016667 ETH"
   @presale_amount "150M $BIRDPAW"
 
-  @impl true
-  def handle_event(
-        "confirm-buy-token",
-        %{
-          "birdpaw_amount" => birdpaw_amount,
-          "wallet_address" => wallet_address,
-          "payment_method" => payment_method,
-          "amount" => amount
-        } = _params,
-        %{assigns: %{presale_form: presale_form}} = socket
-      ) do
-    order_uuid = Ecto.UUID.generate()
-    wei_amount = Map.get(presale_form, :wei_amount, 0)
-
-    qr_code_binary =
-      case {wallet_address, wei_amount} do
-        {_, ""} -> nil
-        _ -> generate_qr_code({wei_amount, amount}, order_uuid, payment_method)
-      end
-
-    presale_form = %{presale_form | qr_code_base64: qr_code_binary}
-
-    order = %{
-      wallet_address: wallet_address,
-      birdpaw_amount: birdpaw_amount,
-      payment_method: payment_method,
-      amount: amount,
-      is_confirmed?: true,
-      timestamp: DateTime.utc_now(),
-      uuid: order_uuid,
-      order_state: "pending",
-      qr_code_base64: presale_form[:qr_code_base64]
-    }
-
-    {:ok, _created_order} = create_presale_order(order)
-
-    {:noreply,
-     socket
-     |> put_flash(:success, "Order created successfully!")
-     |> assign(order: order, presale_form: Map.merge(presale_form, order))}
-  end
-
-  @impl true
-  def handle_event("select-payment-method-type", %{"payment_method" => payment_method}, socket) do
-    # Update payment method (ETH or USDT)
-    socket =
-      assign(
-        socket,
-        :presale_form,
-        Map.put(socket.assigns.presale_form, :payment_method, payment_method)
-      )
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event(
-        "calculate-eth",
-        %{
-          "birdpaw_amount" => birdpaw_amount,
-          "wallet_address" => wallet_address
-        },
-        %{assigns: %{presale_form: %{payment_variant: payment_variant} = presale_form}} = socket
-      ) do
-    payment_method = socket.assigns[:presale_form][:payment_method] || "ETH"
-
-    birdpaw_amount =
-      String.to_integer(birdpaw_amount)
-
-    # Calculate amount based on selected currency
-    amount =
-      case payment_method do
-        "ETH" ->
-          calculate_amount(birdpaw_amount, "ETH")
-
-        "USDT" ->
-          calculate_amount(birdpaw_amount, "USDT")
-
-        _ ->
-          0
-      end
-
-    wei_amount = (amount * 1_000_000_000_000_000_000) |> round()
-
-    presale_form = %{
-      amount: amount,
-      wei_amount: wei_amount,
-      wallet_address: wallet_address,
-      birdpaw_amount: birdpaw_amount,
-      qr_code_base64: nil,
-      show_link: "/payments/qr_code_#{wallet_address}.png",
-      is_confirmed?: false,
-      payment_method: payment_method,
-      payment_variant: payment_variant
-    }
-
-    {:noreply, assign(socket, presale_form: presale_form)}
-  end
-
-  def handle_event(
-        "calculate-amount",
-        %{"birdpaw_amount" => birdpaw_amount, "wallet_address" => wallet_address} = params,
-        socket
-      ) do
-    # Calculate the amount based on birdpaw_amount and any other business logic
-    # For demonstration, let's assume 1 BIRDPAW costs 0.0001 ETH
-    price_per_birdpaw = 0.0001
-    amount_to_pay = String.to_integer(birdpaw_amount) * price_per_birdpaw
-
-    # Update the socket with the new amount
-    updated_presale_form = Map.put(socket.assigns.presale_form, :amount, amount_to_pay)
-    updated_presale_form = Map.put(updated_presale_form, :wallet_address, wallet_address)
-
-    socket = assign(socket, :presale_form, updated_presale_form)
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("toggle-buy-token", %{"toggle" => toggle}, socket) do
-    {:noreply, assign(socket, :toggle_buy_token, toggle == "true")}
-  end
-
   def handle_event("show-image-modal", %{"image" => image}, socket) do
     {:noreply, assign(socket, :modal_image, image)}
   end
@@ -216,19 +93,6 @@ defmodule BirdpawWeb.Components.Promo do
   end
 
   @impl true
-  def handle_event("select-payment-method", %{"method" => method}, socket) do
-    # Assign the selected payment method to the form data
-    socket =
-      assign(
-        socket,
-        :presale_form,
-        Map.put(socket.assigns.presale_form, :payment_variant, method)
-      )
-
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event(
         "previous_page",
         _params,
@@ -258,7 +122,7 @@ defmodule BirdpawWeb.Components.Promo do
       <!-- Promo Header and Content -->
       <.header_section myself={@myself} />
       <.token_info_section />
-      <.call_to_action myself={@myself} toggle_buy_token={@toggle_buy_token} />
+      <.call_to_action myself={@myself} show_presale_form={@presale_form.is_open?} />
       <div class="mt-8 text-center">
         <button
           phx-click="show-search-results"
@@ -281,7 +145,7 @@ defmodule BirdpawWeb.Components.Promo do
         is_authorized_master={@is_authorized_master}
       />
       <!-- Existing modal and promo components -->
-      <%= if @toggle_buy_token do %>
+      <%= if @presale_form.is_open? do %>
         <.buy_token_modal myself={@myself}>
           <.live_component
             :if={@presale_form.is_confirmed?}
@@ -380,7 +244,6 @@ defmodule BirdpawWeb.Components.Promo do
       id="payment-container"
       phx-click="toggle-buy-token"
       phx-value-toggle="true"
-      phx-target={@myself}
       class="relative text-center mt-6 sm:mt-8 rounded-lg overflow-hidden max-w-full"
       style="background-image: url('/images/promo-btn.webp'); background-size: cover; background-position: center;"
     >

@@ -21,7 +21,6 @@ defmodule BirdpawWeb.Components.OrderForm do
         <div
           phx-click="select-payment-method"
           phx-value-method="wallet"
-          phx-target={@myself}
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "wallet", do: "border-teal-500", else: "border-gray-600"}"}
         >
           <span class="block text-lg font-semibold">Web3 Wallet</span>
@@ -30,7 +29,6 @@ defmodule BirdpawWeb.Components.OrderForm do
         <div
           phx-click="select-payment-method"
           phx-value-method="qr"
-          phx-target={@myself}
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "qr", do: "border-teal-500", else: "border-gray-600"}"}
         >
           <span class="block text-lg font-semibold">QR Payment</span>
@@ -41,7 +39,6 @@ defmodule BirdpawWeb.Components.OrderForm do
       <.form
         for={@presale_form}
         phx-change="calculate-amount"
-        phx-target={@myself}
         phx-submit="confirm-buy-token"
         class="space-y-4"
       >
@@ -81,7 +78,6 @@ defmodule BirdpawWeb.Components.OrderForm do
                 id="payment_method-eth"
                 phx-click="select-payment-method-type"
                 phx-value-payment_method="ETH"
-                phx-target={@myself}
                 class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "ETH", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
               >
                 ETH
@@ -90,14 +86,14 @@ defmodule BirdpawWeb.Components.OrderForm do
                 id="payment_method-usdt"
                 phx-click="select-payment-method-type"
                 phx-value-payment_method="USDT"
-                phx-target={@myself}
                 class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "USDT", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
               >
                 USDT
               </div>
             </div>
           </div>
-        <% end %>  <input type="hidden" name="payment_method" value={@presale_form[:payment_method] || "ETH"} />
+        <% end %>
+        <input type="hidden" name="payment_method" value={@presale_form[:payment_method] || "ETH"} />
         <!-- Amount Display -->
         <div class="flex justify-between items-center">
           <label class="text-sm sm:text-base lg:text-lg text-teal-300 font-medium">
@@ -134,7 +130,6 @@ defmodule BirdpawWeb.Components.OrderForm do
           <div class="text-center">
             <button
               phx-click="generate-qr-code"
-              phx-target={@myself}
               class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg"
             >
               Generate New QR Code
@@ -144,33 +139,5 @@ defmodule BirdpawWeb.Components.OrderForm do
       <% end %>
     </div>
     """
-  end
-
-  @impl true
-  def handle_event("select-payment-method", %{"method" => method}, socket) do
-    # Update payment variant (wallet or QR)
-    socket =
-      assign(
-        socket,
-        :presale_form,
-        Map.put(socket.assigns.presale_form, :payment_method, method)
-      )
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("confirm-buy-token", _params, socket) do
-    # Mark the order as confirmed
-    socket =
-      assign(socket, :presale_form, Map.put(socket.assigns.presale_form, :is_confirmed?, true))
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("generate-qr-code", _params, socket) do
-    # Logic to generate the QR code goes here
-    {:noreply, socket}
   end
 end

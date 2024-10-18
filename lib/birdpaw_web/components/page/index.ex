@@ -188,10 +188,10 @@ defmodule BirdpawWeb.Page.Index do
         %{assigns: %{presale_form: %{payment_method: payment_method} = presale_form}} = socket
       ) do
     amount_to_pay =
-      case {payment_method, birdpaw_amount} do
-        {"ETH", ""} -> 0
+      case {payment_method, birdpaw_amount not in [nil, ""]} do
+        {"ETH", false} -> 0
         {"ETH", _} -> birdpaw_amount |> String.to_integer() |> calculate_amount("ETH")
-        {"USDT", ""} -> 0
+        {"USDT", false} -> 0
         {"USDT", _} -> birdpaw_amount |> String.to_integer() |> calculate_amount("USDT")
         _ -> 0
       end

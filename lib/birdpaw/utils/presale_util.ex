@@ -9,6 +9,7 @@ defmodule Birdpaw.PresaleUtil do
   @usdt_conversion_rate 0.00042
   @usdt_decimal_factor :math.pow(10, 6) |> round()
   @owner_wallet "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
+  @min_birdpaw_purchase 50_000
 
   @page_size 10
 
@@ -144,4 +145,6 @@ defmodule Birdpaw.PresaleUtil do
   end
 
   def define_index_based_on_page(data), do: data.page * get_page_size() - get_page_size()
+
+  def min_birdpaw_purchase, do: @min_birdpaw_purchase
 end

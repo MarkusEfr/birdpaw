@@ -12,20 +12,26 @@ defmodule BirdpawWeb.Components.OrderForm do
       id="order-form-section"
       class="bg-gray-800 rounded-lg shadow-md p-6 sm:p-8 max-w-md lg:max-w-xl mx-auto"
     >
-      <!-- Card Header -->
+      <%= if @wallet_address in [nil, ""] do %>
+        <div class="bg-red-500 text-white text-xs px-4 py-2 rounded-md mb-4">
+          No Wallet Detected. Please connect your wallet to proceed.
+        </div>
+      <% end %>
+
       <div class="border-b border-teal-500 pb-4 mb-6">
         <h2 class="text-xl font-bold text-teal-400">Buy $BIRDPAW Tokens</h2>
       </div>
-      <!-- Payment Option Cards -->
+
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div
-          phx-click="select-payment-method"
+          phx-click={if @wallet_address not in [nil, ""], do: "select-payment-method", else: nil}
           phx-value-method="wallet"
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "wallet", do: "border-teal-500", else: "border-gray-600"}"}
         >
           <span class="block text-lg font-semibold">Web3 Wallet</span>
           <small class="block text-xs">Connect with MetaMask</small>
         </div>
+
         <div
           phx-click="select-payment-method"
           phx-value-method="qr"
@@ -35,14 +41,13 @@ defmodule BirdpawWeb.Components.OrderForm do
           <small class="block text-xs">Generate QR Code</small>
         </div>
       </div>
-      <!-- Form for Token Purchase -->
+
       <.form
         for={@presale_form}
         phx-change="calculate-amount"
         phx-submit="confirm-buy-token"
         class="space-y-4"
       >
-        <!-- Amount of $BIRDPAW -->
         <div class="border border-gray-700 rounded-lg p-4 mb-4">
           <h3 class="text-gray-400 text-sm mb-2">Amount of $BIRDPAW</h3>
           <.input
@@ -69,7 +74,7 @@ defmodule BirdpawWeb.Components.OrderForm do
             class="bg-gray-700 text-white border-none rounded-md w-full"
           />
         </div>
-        <!-- Payment Method Selection (Visible for QR Payment) -->
+
         <%= if @presale_form[:payment_variant] == "qr" do %>
           <div class="border border-gray-700 rounded-lg p-4 mb-4">
             <h3 class="text-gray-400 text-sm mb-2">Payment Method</h3>
@@ -93,8 +98,9 @@ defmodule BirdpawWeb.Components.OrderForm do
             </div>
           </div>
         <% end %>
+
         <input type="hidden" name="payment_method" value={@presale_form[:payment_method] || "ETH"} />
-        <!-- Amount Display -->
+
         <div class="flex justify-between items-center">
           <label class="text-sm sm:text-base lg:text-lg text-teal-300 font-medium">
             Amount to Pay
@@ -108,7 +114,7 @@ defmodule BirdpawWeb.Components.OrderForm do
             class="bg-gray-700 text-white border border-teal-500 placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500 rounded-lg p-3 w-full sm:w-2/3 lg:w-1/2"
           />
         </div>
-        <!-- Confirm Button -->
+
         <div class="mt-6">
           <.button
             type="submit"
@@ -121,7 +127,7 @@ defmodule BirdpawWeb.Components.OrderForm do
           </.button>
         </div>
       </.form>
-      <!-- QR Code Section (Visible After Confirmation) -->
+
       <%= if @presale_form[:is_confirmed?] and @presale_form[:payment_variant] == "qr" do %>
         <div class="bg-gray-700 text-white p-4 rounded-lg mt-6">
           <h3 class="text-gray-400 text-sm mb-4">Complete Payment Using QR Code</h3>

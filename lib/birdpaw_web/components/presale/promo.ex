@@ -159,6 +159,7 @@ defmodule BirdpawWeb.Components.Promo do
             id="order-form"
             module={OrderForm}
             presale_form={@presale_form}
+            wallet_address={@wallet_info.address}
             myself={@myself}
           />
         </.buy_token_modal>

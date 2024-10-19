@@ -7,6 +7,8 @@ defmodule BirdpawWeb.Page.Index do
   import Birdpaw.Presale
   import Birdpaw.PresaleUtil
 
+  @contract_address "0x32e4A492068beE178A42382699DBBe8eEF078800"
+
   @impl true
   def mount(params, _session, socket) do
     if connected?(socket), do: Process.send_after(self(), :auto_slide, 5000)
@@ -42,13 +44,13 @@ defmodule BirdpawWeb.Page.Index do
        ],
        expanded: false,
        # Replace with your actual contract address
-       contract_address: "0x32e4A492068beE178A42382699DBBe8eEF078800",
+       contract_address: @contract_address,
        presale_form: %{
          is_open?: false,
          session_id: nil,
          wallet_address: nil,
-         birdpaw_amount: nil,
-         amount: 0.0,
+         birdpaw_amount: min_birdpaw_purchase(),
+         amount: min_birdpaw_purchase() |> calculate_amount("ETH"),
          qr_code_base64: nil,
          is_confirmed?: false,
          payment_method: "ETH",
@@ -94,7 +96,7 @@ defmodule BirdpawWeb.Page.Index do
   def handle_event(
         "select-payment-method",
         %{"method" => method},
-        %{assigns: %{presale_form: presale_form}} = socket
+        %{assigns: %{presale_form: %{birdpaw_amount: birdpaw_amount} = presale_form}} = socket
       ) do
     # Assign the selected payment method to the form data
     payment_method =
@@ -110,8 +112,10 @@ defmodule BirdpawWeb.Page.Index do
        | payment_variant: method,
          payment_method: payment_method,
          amount:
-           if(presale_form.birdpaw_amount == nil, do: "0", else: presale_form.birdpaw_amount)
-           |> String.to_integer()
+           case is_binary(birdpaw_amount) do
+             true -> String.to_integer(birdpaw_amount)
+             false -> birdpaw_amount
+           end
            |> calculate_amount(payment_method)
      })}
   end
@@ -128,8 +132,10 @@ defmodule BirdpawWeb.Page.Index do
        presale_form
        | payment_method: payment_method,
          amount:
-           if(birdpaw_amount == nil, do: "0", else: birdpaw_amount)
-           |> String.to_integer()
+           case is_binary(birdpaw_amount) do
+             true -> String.to_integer(birdpaw_amount)
+             false -> birdpaw_amount
+           end
            |> calculate_amount(payment_method)
      })}
   end
@@ -146,7 +152,7 @@ defmodule BirdpawWeb.Page.Index do
     payment_method = socket.assigns[:presale_form][:payment_method] || "ETH"
 
     birdpaw_amount =
-      String.to_integer(birdpaw_amount)
+      if is_binary(birdpaw_amount), do: String.to_integer(birdpaw_amount), else: birdpaw_amount
 
     # Calculate amount based on selected currency
     amount =

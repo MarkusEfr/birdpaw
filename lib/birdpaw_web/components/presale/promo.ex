@@ -157,9 +157,10 @@ defmodule BirdpawWeb.Components.Promo do
           <.live_component
             :if={!@presale_form.is_confirmed?}
             id="order-form"
+            contract_address={@contract_address}
             module={OrderForm}
             presale_form={@presale_form}
-            wallet_address={@wallet_info.address}
+            wallet_info={@wallet_info}
             myself={@myself}
           />
         </.buy_token_modal>

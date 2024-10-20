@@ -3,8 +3,11 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import AnimateOnScroll from "./hooks/animate_on_scroll"
 import CheckBalances from "./hooks/check_balances"
+import ApproveTransfer from "./hooks/approve_transfer"
 
 let hooks = {}
+
+hooks.ApproveTransfer = ApproveTransfer
 
 hooks.ScrollReveal = {
   mounted() {

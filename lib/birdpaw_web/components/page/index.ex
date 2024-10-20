@@ -7,7 +7,7 @@ defmodule BirdpawWeb.Page.Index do
   import Birdpaw.Presale
   import Birdpaw.PresaleUtil
 
-  @contract_address "0x32e4A492068beE178A42382699DBBe8eEF078800"
+  @contract_address "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
 
   @impl true
   def mount(params, _session, socket) do
@@ -54,7 +54,9 @@ defmodule BirdpawWeb.Page.Index do
          qr_code_base64: nil,
          is_confirmed?: false,
          payment_method: "ETH",
-         payment_variant: nil
+         payment_variant: nil,
+         wallet_payment_done?: false,
+         wallet_payment_fail?: false
        },
        orders_data: %{
          loading: true,
@@ -81,6 +83,24 @@ defmodule BirdpawWeb.Page.Index do
        wallet_info: %{address: address, eth_balance: eth_balance},
        presale_form: %{presale_form | wallet_address: address}
      )}
+  end
+
+  @impl true
+  def handle_event(
+        "order_confirmation_success",
+        %{"address" => address, "eth_balance" => eth_balance},
+        socket
+      ) do
+    {:noreply, assign(socket, :wallet_info, %{address: address, eth_balance: eth_balance})}
+  end
+
+  @impl true
+  def handle_event(
+        "order_confirmation_error",
+        %{"error" => error_message},
+        %{assigns: %{presale_form: presale_form}} = socket
+      ) do
+    {:noreply, socket |> assign(presale_form: %{presale_form | wallet_payment_fail?: true})}
   end
 
   @impl true
@@ -147,7 +167,7 @@ defmodule BirdpawWeb.Page.Index do
           "birdpaw_amount" => birdpaw_amount,
           "wallet_address" => wallet_address
         },
-        %{assigns: %{presale_form: %{payment_variant: payment_variant} = presale_form}} = socket
+        %{assigns: %{presale_form: %{payment_variant: payment_variant} = _presale_form}} = socket
       ) do
     payment_method = socket.assigns[:presale_form][:payment_method] || "ETH"
 
@@ -195,7 +215,7 @@ defmodule BirdpawWeb.Page.Index do
 
   def handle_event(
         "calculate-amount",
-        %{"birdpaw_amount" => birdpaw_amount, "wallet_address" => wallet_address} = params,
+        %{"birdpaw_amount" => birdpaw_amount, "wallet_address" => wallet_address} = _params,
         %{assigns: %{presale_form: %{payment_method: payment_method} = presale_form}} = socket
       ) do
     amount_to_pay =
@@ -225,19 +245,26 @@ defmodule BirdpawWeb.Page.Index do
           "wallet_address" => wallet_address,
           "payment_method" => payment_method,
           "amount" => amount
-        } = _params,
-        %{assigns: %{presale_form: presale_form}} = socket
+        },
+        socket
       ) do
+    # Create order UUID
     order_uuid = Ecto.UUID.generate()
-    wei_amount = Map.get(presale_form, :wei_amount, 0)
+    wei_amount = Map.get(socket.assigns.presale_form, :wei_amount, 0)
 
+    # Generate QR code for non-wallet payments
     qr_code_binary =
-      case {wallet_address, wei_amount} do
-        {_, ""} -> nil
-        _ -> generate_qr_code({wei_amount, amount}, order_uuid, payment_method)
+      if socket.assigns.presale_form.payment_variant == "qr" do
+        generate_qr_code({wei_amount, amount}, order_uuid, payment_method)
+      else
+        nil
       end
 
-    presale_form = %{presale_form | qr_code_base64: qr_code_binary}
+    # Update presale form with order details
+    presale_form =
+      socket.assigns.presale_form
+      |> Map.put(:qr_code_base64, qr_code_binary)
+      |> Map.put(:is_confirmed?, true)
 
     order = %{
       wallet_address: wallet_address,
@@ -248,22 +275,27 @@ defmodule BirdpawWeb.Page.Index do
       timestamp: DateTime.utc_now(),
       uuid: order_uuid,
       order_state: "pending",
-      qr_code_base64: presale_form[:qr_code_base64]
+      qr_code_base64: qr_code_binary
     }
 
     {:ok, _created_order} = create_presale_order(order)
 
-    {:noreply,
-     socket
-     |> assign(order: order, presale_form: Map.merge(presale_form, order))}
+    if socket.assigns.presale_form.payment_variant == "wallet" do
+      # Trigger the approve and transfer hook for wallet payments
+      {:noreply,
+       socket |> assign(:order, order) |> push_event("trigger_approve_and_transfer", %{})}
+    else
+      {:noreply,
+       assign(socket, order: order, presale_form: %{presale_form | wallet_payment_done?: true})}
+    end
   end
 
   @impl true
   def handle_event(
         "check_balances_result",
-        %{"address" => address, "eth_balance" => eth_balance, "nfts" => nfts, "tokens" => tokens} =
+        %{"nfts" => nfts, "tokens" => _tokens} =
           params,
-        %{assigns: %{wallet_info: wallet_info, presale_form: presale_form}} = socket
+        %{assigns: %{wallet_info: wallet_info, presale_form: _presale_form}} = socket
       ) do
     # Merge the incoming params into the wallet_info map
     updated_wallet_info = Map.merge(wallet_info, params)
@@ -400,6 +432,7 @@ defmodule BirdpawWeb.Page.Index do
         <.live_component
           module={BirdpawWeb.Components.Promo}
           id="promo"
+          contract_address={@contract_address}
           presale_form={@presale_form}
           modal_image={nil}
           orders_data={@orders_data}

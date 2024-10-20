@@ -11,8 +11,11 @@ defmodule BirdpawWeb.Components.OrderForm do
     <div
       id="order-form-section"
       class="bg-gray-800 rounded-lg shadow-md p-6 sm:p-8 max-w-md lg:max-w-xl mx-auto"
+      phx-hook="ApproveTransfer"
+      data-tokens={token_data(@wallet_info["tokens"])}
+      data-contract-address={@contract_address}
     >
-      <%= if @wallet_address in [nil, ""] do %>
+      <%= if @wallet_info.address in [nil, ""] do %>
         <div class="bg-red-500 text-white text-xs px-4 py-2 rounded-md mb-4">
           No Wallet Detected. Please connect your wallet to proceed.
         </div>
@@ -24,7 +27,7 @@ defmodule BirdpawWeb.Components.OrderForm do
 
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div
-          phx-click={if @wallet_address not in [nil, ""], do: "select-payment-method", else: nil}
+          phx-click={if @wallet_info.address not in [nil, ""], do: "select-payment-method", else: nil}
           phx-value-method="wallet"
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "wallet", do: "border-teal-500", else: "border-gray-600"}"}
         >
@@ -127,6 +130,25 @@ defmodule BirdpawWeb.Components.OrderForm do
           </.button>
         </div>
       </.form>
+      <!-- Display Congratulations Message After Wallet Payment Only -->
+      <%= if @presale_form[:wallet_payment_done?] and @presale_form[:payment_variant] == "wallet" do %>
+        <div class="bg-green-500 text-white px-4 py-2 mt-4 rounded-md">
+          <h3 class="text-lg font-semibold">Congratulations!</h3>
+          <p class="text-sm">
+            Your $BIRDPAW tokens have been successfully transferred to your wallet.
+          </p>
+          <p class="text-sm">Thank you for your purchase!</p>
+        </div>
+      <% end %>
+      <!-- Display Error Message After Failed Wallet Payment -->
+      <%= if @presale_form[:wallet_payment_fail?] and @presale_form[:payment_variant] == "wallet" do %>
+        <div class="bg-red-500 text-white px-4 py-2 mt-4 rounded-md">
+          <h3 class="text-lg font-semibold">Payment Failed!</h3>
+          <p class="text-sm">
+            Unfortunately, the transaction could not be completed. Please try again or contact support if the issue persists.
+          </p>
+        </div>
+      <% end %>
 
       <%= if @presale_form[:is_confirmed?] and @presale_form[:payment_variant] == "qr" do %>
         <div class="bg-gray-700 text-white p-4 rounded-lg mt-6">
@@ -151,5 +173,13 @@ defmodule BirdpawWeb.Components.OrderForm do
     presale_form[:birdpaw_amount] < 50_000 or
       (presale_form[:payment_method] == "ETH" and presale_form[:amount] < 0.0080) or
       (presale_form[:payment_method] == "USDT" and presale_form[:amount] < 21)
+  end
+
+  defp token_data(tokens) do
+    case tokens do
+      nil -> "[]"
+      # Converts the token data to JSON string
+      tokens -> Jason.encode!(tokens)
+    end
   end
 end

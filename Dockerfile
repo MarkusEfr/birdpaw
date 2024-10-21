@@ -1,16 +1,4 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS resolution issues in production.
-#
-# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
-# https://hub.docker.com/_/ubuntu?tab=tags
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240701-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.17.2-erlang-27.0-debian-bullseye-20240701-slim
-#
+# ARG declarations for Elixir, Erlang, and Debian versions
 ARG ELIXIR_VERSION=1.17.2
 ARG OTP_VERSION=27.0
 ARG DEBIAN_VERSION=bullseye-20240701-slim
@@ -18,80 +6,90 @@ ARG DEBIAN_VERSION=bullseye-20240701-slim
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
+# Builder stage
 FROM ${BUILDER_IMAGE} as builder
 
-# install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+# Install build dependencies and Node.js (with npm)
+RUN apt-get update -y && \
+  apt-get install -y build-essential git curl \
+  && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+  && apt-get install -y nodejs \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# prepare build dir
+# Set the working directory
 WORKDIR /app
 
-# install hex + rebar
+# Install Hex and Rebar
 RUN mix local.hex --force && \
-    mix local.rebar --force
+  mix local.rebar --force
 
-# set build ENV
+# Set environment to production
 ENV MIX_ENV="prod"
 
-# install mix dependencies
+# Install mix dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
-# copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
-COPY config/config.exs config/${MIX_ENV}.exs config/
+# Copy compile-time config files before compiling dependencies
+COPY config/config.exs config/prod.exs config/
 RUN mix deps.compile
 
+# Copy the priv directory
 COPY priv priv
 
+# Copy the lib directory
 COPY lib lib
 
+# Install npm dependencies in the assets directory
+COPY assets/package.json assets/package-lock.json ./assets/
+RUN cd assets && npm install
+
+# Copy the assets folder
 COPY assets assets
 
-# compile assets
+# Compile assets (Tailwind, Esbuild, etc.)
 RUN mix assets.deploy
 
-# Compile the release
+# Compile the Elixir release
 RUN mix compile
 
-# Changes to config/runtime.exs don't require recompiling the code
+# Copy runtime configuration files
 COPY config/runtime.exs config/
 
+# Copy the rel directory for release
 COPY rel rel
+
+# Build the release
 RUN mix release
 
-# start a new build stage so that the final image will only contain
-# the compiled release and other runtime necessities
+# Start a new stage for the final runtime image
 FROM ${RUNNER_IMAGE}
 
+# Install runtime dependencies
 RUN apt-get update -y && \
   apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
-  && apt-get clean && rm -f /var/lib/apt/lists/*_*
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set the locale
+# Set locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# Set the working directory
 WORKDIR "/app"
 RUN chown nobody /app
 
-# set runner ENV
+# Set environment to production
 ENV MIX_ENV="prod"
 
-# Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/birdpaw ./
+# Copy the release from the builder stage
+COPY --from=builder --chown=nobody:root /app/_build/prod/rel/birdpaw ./
 
+# Set the user to nobody for security
 USER nobody
 
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install`
-# above and adding an entrypoint. See https://github.com/krallin/tini for details
-# ENTRYPOINT ["/tini", "--"]
-
+# Set the default command to start the Phoenix server
 CMD ["/app/bin/server"]

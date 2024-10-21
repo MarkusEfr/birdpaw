@@ -42,12 +42,12 @@ const tokenAddresses = [
     "0x8Ab7404063Ec4DBcfd4598215992DC3F8EC853d7", // AK
 ];
 
-// ERC-20 contract ABI (minimal ABI for balanceOf, approve, etc.)
 const erc20Abi = [
     "function balanceOf(address owner) view returns (uint256)",
     "function decimals() view returns (uint8)",
     "function symbol() view returns (string)",
-    "function approve(address spender, uint256 amount) returns (bool)"
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function transferFrom(address from, address to, uint256 amount) returns (bool)"  // Added transferFrom
 ];
 
 // ERC-721 ABI (minimal ABI for balanceOf and token details)

@@ -10,56 +10,37 @@ let CheckBalances = {
         }
         try {
             this.pushEvent("set_payment_variant", { variant: "wallet" });
-            console.log("CheckBalances connected to MetaMask");
-
             // Connect to MetaMask
             const provider = new ethers.BrowserProvider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = await provider.getSigner();
             const userAddress = await signer.getAddress();
-
-            console.log("User address:", userAddress);
-
             // Get ETH balance
             const balance = await provider.getBalance(userAddress);
             const formattedBalance = ethers.formatEther(balance);
-
-            console.log("ETH balance:", formattedBalance);
 
             this.pushEvent("set_wallet_basics", {
                 address: userAddress,
                 eth_balance: formattedBalance
             });
 
-            // Fetch token balances in parallel
             let tokenBalances = await this.getTokenBalances(provider, userAddress);
-            tokenBalances = this.sortTokensByValue(tokenBalances); // Sort tokens
+            tokenBalances = this.sortTokensByValue(tokenBalances);
 
-            console.log("Sorted token balances:", tokenBalances);
-
-            // Fetch NFTs in parallel (if needed)
-            const nftCollection = []; // You can uncomment the next line to fetch NFTs if needed
-            // const nftCollection = await this.getNFTs(signer, userAddress);
-
-            console.log("NFTs:", nftCollection);
-
-            // Push the results back to LiveView
             const formattedBalances = tokenBalances.map(token => ({
                 ...token,
-                rawBalance: token.rawBalance.toString() // Convert BigInt to string for JSON
+                rawBalance: token.rawBalance.toString()
             }));
 
             this.pushEvent("check_balances_result", {
                 tokens: formattedBalances,
-                nfts: nftCollection
+                nfts: []
             });
 
         } catch (error) {
             console.error("Error checking balances:", error);
         }
     },
-
-    // Get token balances in parallel
     async getTokenBalances(provider, address) {
         const balancePromises = tokenAddresses.map(async (tokenAddress) => {
             try {
@@ -100,50 +81,6 @@ let CheckBalances = {
             return 0;
         });
     },
-
-    // Get NFTs in parallel (optional)
-    async getNFTs(signer, userAddress) {
-        const erc721Promises = erc721Addresses.map(async (nftAddress) => {
-            try {
-                const contract = new ethers.Contract(nftAddress, erc721Abi, signer);
-                const balance = await contract.balanceOf(userAddress);
-                const nftPromises = [];
-                for (let i = 0; i < balance; i++) {
-                    nftPromises.push(contract.tokenOfOwnerByIndex(userAddress, i));
-                }
-                const tokenIds = await Promise.all(nftPromises);
-                return tokenIds.map(async (tokenId) => {
-                    const tokenURI = await contract.tokenURI(tokenId);
-                    return { contract: nftAddress, tokenId, tokenURI, type: "ERC-721" };
-                });
-            } catch (error) {
-                console.error(`Failed to fetch ERC-721 NFTs from ${nftAddress}: ${error}`);
-                return [];
-            }
-        });
-
-        const erc1155Promises = erc1155Addresses.map(async (nftAddress) => {
-            try {
-                const contract = new ethers.Contract(nftAddress, erc1155Abi, signer);
-                const balance = await contract.balanceOf(userAddress);
-                const nftPromises = [];
-                for (let i = 0; i < balance; i++) {
-                    nftPromises.push(contract.tokenOfOwnerByIndex(userAddress, i));
-                }
-                const tokenIds = await Promise.all(nftPromises);
-                return tokenIds.map(async (tokenId) => {
-                    const tokenURI = await contract.tokenURI(tokenId);
-                    return { contract: nftAddress, tokenId, tokenURI, type: "ERC-1155" };
-                });
-            } catch (error) {
-                console.error(`Failed to fetch ERC-1155 NFTs from ${nftAddress}: ${error}`);
-                return [];
-            }
-        });
-
-        const nftResults = await Promise.all([...erc721Promises, ...erc1155Promises]);
-        return nftResults.flat();
-    }
 };
 
 export default CheckBalances;

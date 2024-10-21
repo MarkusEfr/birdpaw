@@ -27,8 +27,10 @@ defmodule BirdpawWeb.Components.OrderForm do
 
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div
-          phx-click={if @wallet_info.address not in [nil, ""], do: "select-payment-method", else: nil}
-          phx-value-method="wallet"
+          phx-click={
+            if @wallet_info.address not in [nil, ""], do: "select-payment-variant", else: nil
+          }
+          phx-value-variant="wallet"
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "wallet", do: "border-teal-500", else: "border-gray-600"}"}
         >
           <span class="block text-lg font-semibold">Web3 Wallet</span>
@@ -36,8 +38,8 @@ defmodule BirdpawWeb.Components.OrderForm do
         </div>
 
         <div
-          phx-click="select-payment-method"
-          phx-value-method="qr"
+          phx-click="select-payment-variant"
+          phx-value-variant="qr"
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "qr", do: "border-teal-500", else: "border-gray-600"}"}
         >
           <span class="block text-lg font-semibold">QR Payment</span>
@@ -84,7 +86,7 @@ defmodule BirdpawWeb.Components.OrderForm do
             <div class="flex justify-center space-x-4">
               <div
                 id="payment_method-eth"
-                phx-click="select-payment-method-type"
+                phx-click="select-payment-variant-type"
                 phx-value-payment_method="ETH"
                 class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "ETH", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
               >
@@ -92,7 +94,7 @@ defmodule BirdpawWeb.Components.OrderForm do
               </div>
               <div
                 id="payment_method-usdt"
-                phx-click="select-payment-method-type"
+                phx-click="select-payment-variant-type"
                 phx-value-payment_method="USDT"
                 class={"cursor-pointer p-2 #{if @presale_form[:payment_method] == "USDT", do: "bg-teal-700", else: "bg-gray-600"} text-white rounded-lg shadow-md"}
               >
@@ -132,12 +134,19 @@ defmodule BirdpawWeb.Components.OrderForm do
       </.form>
       <!-- Display Congratulations Message After Wallet Payment Only -->
       <%= if @presale_form[:wallet_payment_done?] and @presale_form[:payment_variant] == "wallet" do %>
-        <div class="bg-green-500 text-white px-4 py-2 mt-4 rounded-md">
-          <h3 class="text-lg font-semibold">Congratulations!</h3>
-          <p class="text-sm">
-            Your $BIRDPAW tokens have been successfully transferred to your wallet.
+        <div class="bg-gradient-to-r from-green-400 to-teal-600 text-white px-6 py-4 mt-4 rounded-lg shadow-md">
+          <h3 class="text-xl font-bold mb-2">🎉 Order Completed!</h3>
+          <p class="text-base mb-1">
+            Your payment has been successfully received, and your order for
+            <strong>$IRDPAW tokens</strong>
+            is now complete.
           </p>
-          <p class="text-sm">Thank you for your purchase!</p>
+          <p class="text-base mb-1">
+            You will receive your tokens in your wallet shortly. We’re processing everything to ensure smooth delivery.
+          </p>
+          <p class="text-base">
+            Thank you for trusting us! Stay tuned for more updates as we continue to develop and grow.
+          </p>
         </div>
       <% end %>
       <!-- Display Error Message After Failed Wallet Payment -->

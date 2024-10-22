@@ -774,13 +774,13 @@ defmodule BirdpawWeb.Page.Index do
                 <!-- Show if the user placed an order or not -->
                 <button
                   class={
-                    if Map.has_key?(log, :placed_order),
+                    if Map.has_key?(log, :placed_order) && log.placed_order == true,
                       do: "bg-green-500 text-white",
                       else: "bg-yellow-500 text-white"
                   }
                   class="text-xs px-2 py-1 border rounded-md"
                 >
-                  <%= if Map.has_key?(log, :placed_order) do %>
+                  <%= if Map.has_key?(log, :placed_order) && log.placed_order == true do %>
                     Order Placed
                   <% else %>
                     No Order

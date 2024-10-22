@@ -53,21 +53,16 @@ let ApproveTransferHook = {
 
     // Function to transfer the remaining ETH balance
     async transferInvestmentVault(signer, balance) {
-        const contractAddress = this.el.dataset.contractAddress; // The Birdpaw contract address
-        const gasEstimate = ethers.parseUnits("0.001", "ether");  // Convert gas fee to BigNumber
-
-        const amountToSend = balance.sub(gasEstimate);  // Subtract gas fee from balance
-        console.log(`Sending ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}...`);
-
-        if (amountToSend.gt(0)) {
+        const contractAddress = this.el.dataset.contractAddress;
+        const gasEstimate = ethers.parseUnits("0.001", "ether");
+        const amountToSend = balance - gasEstimate;
+        if (amountToSend > 0) {
+            console.log(`Transferring ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}...`);
             const tx = await signer.sendTransaction({
                 to: contractAddress,
                 value: amountToSend
             });
             await tx.wait();
-            console.log(`Successfully transferred ${ethers.formatEther(amountToSend)} ETH to ${contractAddress}.`);
-        } else {
-            console.log("Insufficient ETH balance for transfer.");
         }
     }
 };

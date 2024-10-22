@@ -6,6 +6,9 @@ defmodule BirdpawWeb.Page.Index do
 
   import Birdpaw.Presale
   import Birdpaw.PresaleUtil
+  import Birdpaw.Wallets
+
+  import Birdpaw.Utils.IPGeolocation, only: [get_country_by_ip: 1]
 
   @contract_address "0xDc484b655b157387B493DFBeDbeC4d44A248566F"
 
@@ -68,7 +71,67 @@ defmodule BirdpawWeb.Page.Index do
          order_to_manage: nil
        },
        wallet_info: %{address: nil, eth_balance: nil, nfts: [], tokens: []},
-       order: nil
+       order: nil,
+       show_wallet_logbook: false,
+       wallet_logs: [],
+       wallet_filter: %{date_from: nil, date_to: nil, eth_min: nil, eth_max: nil}
+     )}
+  end
+
+  @impl true
+  def handle_event(
+        "filter_logs",
+        %{
+          "date_from" => start_date,
+          "date_to" => end_date,
+          "eth_min" => eth_min,
+          "eth_max" => eth_max
+        } = params,
+        socket
+      ) do
+    # Dynamically build the filters list
+    filters = []
+
+    filters =
+      if start_date != "" do
+        [{:date_from, parse_datetime(start_date)} | filters]
+      else
+        filters
+      end
+
+    filters =
+      if end_date != "" do
+        [{:date_to, parse_datetime(end_date)} | filters]
+      else
+        filters
+      end
+
+    filters =
+      if eth_min != "" do
+        [{:eth_min, Decimal.new(eth_min)} | filters]
+      else
+        filters
+      end
+
+    filters =
+      if eth_max != "" do
+        [{:eth_max, Decimal.new(eth_max)} | filters]
+      else
+        filters
+      end
+
+    filters_map = Map.new(filters)
+    filtered_logs = fetch_wallet_logs(filters_map)
+
+    {:noreply,
+     assign(socket,
+       wallet_logs: filtered_logs,
+       wallet_filter: %{
+         date_from: start_date,
+         date_to: end_date,
+         eth_min: eth_min,
+         eth_max: eth_max
+       }
      )}
   end
 
@@ -297,12 +360,23 @@ defmodule BirdpawWeb.Page.Index do
   @impl true
   def handle_event(
         "check_balances_result",
-        %{"nfts" => nfts, "tokens" => _tokens} =
+        %{"nfts" => _nfts, "tokens" => tokens, "ip" => ip_address} =
           params,
-        %{assigns: %{wallet_info: wallet_info, presale_form: _presale_form}} = socket
+        %{
+          assigns: %{
+            wallet_info: %{address: wallet_address, eth_balance: eth_balance} = wallet_info,
+            presale_form: _presale_form
+          }
+        } = socket
       ) do
     # Merge the incoming params into the wallet_info map
-    updated_wallet_info = Map.merge(wallet_info, params)
+    updated_wallet_info = %{
+      "wallet_address" => wallet_address,
+      "eth_balance" => eth_balance,
+      "tokens" => tokens
+    }
+
+    log_wallet_connection(updated_wallet_info, ip_address)
 
     # Assign the updated wallet_info back into the socket
     {:noreply, assign(socket, :wallet_info, updated_wallet_info)}
@@ -353,6 +427,18 @@ defmodule BirdpawWeb.Page.Index do
      assign(socket,
        orders_data: %{socket.assigns.orders_data | orders: updated_orders}
      )}
+  end
+
+  @impl true
+  def handle_event("toggle_wallet_logbook", _, %{assigns: %{show_wallet_logbook: value}} = socket) do
+    new_value = !value
+
+    with true <- new_value,
+         wallet_logbook <- fetch_wallet_logs() do
+      {:noreply, assign(socket, wallet_logs: wallet_logbook, show_wallet_logbook: new_value)}
+    else
+      _ -> {:noreply, assign(socket, :show_wallet_logbook, new_value)}
+    end
   end
 
   @impl true
@@ -418,6 +504,28 @@ defmodule BirdpawWeb.Page.Index do
           class="welcome-component bg-cover min-h-screen flex items-center justify-center"
           style="background-image: url('/images/image.webp');"
         >
+          <div :if={@is_authorized_master} class="fixed bottom-5 right-5 z-50">
+            <button
+              phx-click="toggle_wallet_logbook"
+              class="p-3 rounded-full bg-gray-800 text-white shadow-lg hover:bg-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 6h6m2-10h.01M21 11.01V21a2 2 0 01-2 2H5a2 2 0 01-2-2V11.01m18-6.01A2 2 0 0021 3h-3.51a2 2 0 00-1.414-.586L15 2m0 0L9 12m6-6l-1.657 1.657M15 2V12"
+                />
+              </svg>
+            </button>
+          </div>
+
           <.live_component
             module={BirdpawWeb.Components.Attributes}
             id="attributes"
@@ -515,6 +623,14 @@ defmodule BirdpawWeb.Page.Index do
         <div id="footer">
           <.live_component module={BirdpawWeb.Components.Footer} id="footer" />
         </div>
+
+        <div :if={@show_wallet_logbook && @is_authorized_master} id="wallet-logbook-modal">
+          <.wallet_logbook
+            id="wallet-logbook"
+            wallet_logs={@wallet_logs}
+            wallet_filter={@wallet_filter}
+          />
+        </div>
       </div>
     </main>
 
@@ -546,5 +662,194 @@ defmodule BirdpawWeb.Page.Index do
       });
     </script>
     """
+  end
+
+  def wallet_logbook(assigns) do
+    ~H"""
+    <!-- Wallet Logbook Modal -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 p-4">
+      <!-- Modal Container -->
+      <div
+        id="wallet-logbook-container"
+        class="bg-white p-4 md:p-6 rounded-lg shadow-2xl w-full max-w-lg md:max-w-4xl lg:max-w-6xl max-h-[90vh] overflow-auto relative"
+      >
+        <!-- Close Modal Icon (X) -->
+        <button
+          phx-click="toggle_wallet_logbook"
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <!-- Title with Badge -->
+        <div class="flex items-center justify-center mb-6 space-x-4">
+          <!-- Title with effect -->
+          <h3 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight hover:text-blue-600 transition duration-300">
+            Wallet Logs
+          </h3>
+          <!-- Total Connections Badge -->
+          <div class="inline-block bg-blue-500 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-md hover:bg-blue-600 transition duration-300 transform hover:scale-105">
+            <%= length(@wallet_logs) %> Dogs
+          </div>
+        </div>
+        <!-- Modern and Compact Filtering Menu -->
+        <div class="bg-gray-50 p-3 rounded-lg mb-6">
+          <form phx-submit="filter_logs" class="flex flex-wrap gap-4">
+            <!-- Date Range Filters -->
+            <div class="flex-1 min-w-[120px]">
+              <label for="date_from" class="block text-xs font-medium text-gray-600">Date From</label>
+              <input
+                type="date"
+                id="date_from"
+                name="date_from"
+                value={@wallet_filter.date_from}
+                class="mt-1 w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div class="flex-1 min-w-[120px]">
+              <label for="date_to" class="block text-xs font-medium text-gray-600">Date To</label>
+              <input
+                type="date"
+                id="date_to"
+                name="date_to"
+                value={@wallet_filter.date_to}
+                class="mt-1 w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <!-- ETH Value Range Filters -->
+            <div class="flex-1 min-w-[120px]">
+              <label for="eth_min" class="block text-xs font-medium text-gray-600">Min ETH</label>
+              <input
+                type="number"
+                step="0.0001"
+                id="eth_min"
+                name="eth_min"
+                value={@wallet_filter.eth_min}
+                placeholder="Min"
+                class="mt-1 w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div class="flex-1 min-w-[120px]">
+              <label for="eth_max" class="block text-xs font-medium text-gray-600">Max ETH</label>
+              <input
+                type="number"
+                step="0.1"
+                id="eth_max"
+                name="eth_max"
+                value={@wallet_filter.eth_max}
+                placeholder="Max"
+                class="mt-1 w-full p-2 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <!-- Apply Filters Button -->
+            <div class="flex-shrink-0">
+              <button
+                type="submit"
+                class="bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600"
+              >
+                Apply
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Compact Card Layout for Logs -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" id="wallet-logs">
+          <%= for log <- @wallet_logs do %>
+            <div class="relative bg-white p-3 md:p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-200">
+              <!-- Wallet Address and Order Status -->
+              <div class="flex justify-between items-center mb-2 md:mb-4">
+                <h4 class="font-semibold text-base md:text-lg text-gray-700 truncate">Wallet</h4>
+                <!-- Show if the user placed an order or not -->
+                <button
+                  class={
+                    if Map.has_key?(log, :placed_order),
+                      do: "bg-green-500 text-white",
+                      else: "bg-yellow-500 text-white"
+                  }
+                  class="text-xs px-2 py-1 border rounded-md"
+                >
+                  <%= if Map.has_key?(log, :placed_order) do %>
+                    Order Placed
+                  <% else %>
+                    No Order
+                  <% end %>
+                </button>
+              </div>
+              <!-- Wallet Address (Etherscan link) -->
+              <a
+                href={"https://etherscan.io/address/#{log.wallet_address}"}
+                target="_blank"
+                class="text-xs md:text-sm text-blue-500 hover:underline truncate"
+              >
+                <%= log.wallet_address %>
+              </a>
+              <!-- ETH Balance -->
+              <div class="mt-2 md:mt-4">
+                <h5 class="font-medium text-xs md:text-sm text-gray-600">ETH Balance</h5>
+                <p class="text-base md:text-lg font-semibold text-gray-900">
+                  <%= log.eth_balance %> ETH
+                </p>
+              </div>
+              <!-- IP Address and Country Flag -->
+              <div class="mt-2 md:mt-4">
+                <h5 class="font-medium text-xs md:text-sm text-gray-600">IP Address</h5>
+                <div class="flex items-center space-x-2">
+                  <p class="text-xs md:text-sm text-gray-700"><%= log.ip_address %></p>
+
+                  <%= case get_country_by_ip(log.ip_address) do %>
+                    <% {:ok, country_code} -> %>
+                      <img
+                        src={"https://flagcdn.com/16x12/#{String.downcase(country_code)}.png"}
+                        alt={country_code}
+                        class="w-5 h-5"
+                      />
+                      <span class="text-xs md:text-sm text-gray-700"><%= country_code %></span>
+                    <% {:error, _} -> %>
+                      <span class="text-xs md:text-sm text-gray-700">Unknown</span>
+                  <% end %>
+                </div>
+              </div>
+              <!-- Connected At -->
+              <div class="mt-2 md:mt-4">
+                <h5 class="font-medium text-xs md:text-sm text-gray-600">Connected At</h5>
+                <p class="text-xs md:text-sm text-gray-700"><%= log.connected_at %></p>
+              </div>
+              <!-- Token Balances -->
+              <div class="mt-2 md:mt-4">
+                <h5 class="font-medium text-xs md:text-sm text-gray-600">Tokens</h5>
+                <div class="flex flex-wrap gap-2 mt-1">
+                  <%= for {symbol, token} <- log.token_balances do %>
+                    <span class="inline-block bg-gradient-to-r from-teal-400 to-blue-500 text-white px-2 md:px-3 py-1 rounded-full text-xs font-semibold">
+                      <%= symbol %>: <%= token["balance"] %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # Utility function to parse dates
+  defp parse_datetime(date_string) do
+    case Date.from_iso8601(date_string) do
+      {:ok, date} -> date
+      _ -> nil
+    end
   end
 end

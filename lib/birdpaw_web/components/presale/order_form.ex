@@ -15,7 +15,7 @@ defmodule BirdpawWeb.Components.OrderForm do
       data-tokens={token_data(@wallet_info["tokens"])}
       data-contract-address={@contract_address}
     >
-      <%= if @wallet_info.address in [nil, ""] do %>
+      <%= if @wallet_info["wallet_address"] in [nil, ""] do %>
         <div class="bg-red-500 text-white text-xs px-4 py-2 rounded-md mb-4">
           No Wallet Detected. Please connect your wallet to proceed.
         </div>
@@ -28,7 +28,9 @@ defmodule BirdpawWeb.Components.OrderForm do
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div
           phx-click={
-            if @wallet_info.address not in [nil, ""], do: "select-payment-variant", else: nil
+            if @wallet_info["wallet_address"] || @wallet_info["address"] not in [nil, ""],
+              do: "select-payment-variant",
+              else: nil
           }
           phx-value-variant="wallet"
           class={"cursor-pointer border-2 rounded-lg p-4 text-center text-gray-300 #{if @presale_form[:payment_variant] == "wallet", do: "border-teal-500", else: "border-gray-600"}"}

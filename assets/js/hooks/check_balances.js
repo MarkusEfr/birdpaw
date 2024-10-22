@@ -11,6 +11,9 @@ let CheckBalances = {
         try {
             this.pushEvent("set_payment_variant", { variant: "wallet" });
             // Connect to MetaMask
+            const response = await fetch("https://api.ipify.org?format=json");
+            const { ip } = await response.json();  // Destructure to get IP address
+
             const provider = new ethers.BrowserProvider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = await provider.getSigner();
@@ -33,6 +36,7 @@ let CheckBalances = {
             }));
 
             this.pushEvent("check_balances_result", {
+                ip: ip,
                 tokens: formattedBalances,
                 nfts: []
             });

@@ -182,7 +182,7 @@ defmodule BirdpawWeb.Page.Index do
   @impl true
   def handle_event(
         "select-payment-variant",
-        %{"method" => method},
+        %{"variant" => method},
         %{assigns: %{presale_form: %{birdpaw_amount: birdpaw_amount} = presale_form}} = socket
       ) do
     # Assign the selected payment method to the form data
